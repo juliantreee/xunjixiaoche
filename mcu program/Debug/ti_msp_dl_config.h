@@ -103,10 +103,10 @@ extern "C" {
 #define LMotor_INST_INT_IRQN                                    (TIMA0_INT_IRQn)
 #define LMotor_INST_LOAD_VALUE                                              (0U)
 /* GPIO defines for channel 0 */
-#define GPIO_LMotor_C0_PORT                                                GPIOA
-#define GPIO_LMotor_C0_PIN                                        DL_GPIO_PIN_21
-#define GPIO_LMotor_C0_IOMUX                                     (IOMUX_PINCM46)
-#define GPIO_LMotor_C0_IOMUX_FUNC                    IOMUX_PINCM46_PF_TIMA0_CCP0
+#define GPIO_LMotor_C0_PORT                                                GPIOB
+#define GPIO_LMotor_C0_PIN                                         DL_GPIO_PIN_8
+#define GPIO_LMotor_C0_IOMUX                                     (IOMUX_PINCM25)
+#define GPIO_LMotor_C0_IOMUX_FUNC                    IOMUX_PINCM25_PF_TIMA0_CCP0
 
 /* Defines for RMotor */
 #define RMotor_INST                                                      (TIMA1)

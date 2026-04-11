@@ -34,6 +34,8 @@
 #include "Motor.h"
 #include "delay.h"
 #include "Graysensor.h"
+#include "ti_msp_dl_config.h"
+#include"encoder.h"
 
 int main(void)
 {
@@ -51,4 +53,6 @@ int main(void)
         
         
     }
+    void main (void)
+    {}
 }
