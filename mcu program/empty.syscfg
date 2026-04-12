@@ -27,6 +27,9 @@ const UART1    = UART.addInstance();
  * Write custom configuration values to the imported modules.
  */
 CAPTURE1.$name                              = "LMotor";
+CAPTURE1.timerClkPrescale                   = 2;
+CAPTURE1.captMode                           = "COMBINED_UP";
+CAPTURE1.interrupts                         = ["CC0_DN","CC0_UP"];
 CAPTURE1.peripheral.$assign                 = "TIMA0";
 CAPTURE1.peripheral.ccp0Pin.$assign         = "PB8";
 CAPTURE1.ccp0PinConfig.hideOutputInversion  = scripting.forceWrite(false);
@@ -37,6 +40,9 @@ CAPTURE1.ccp0PinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric4
 const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
 
 CAPTURE2.$name                              = "RMotor";
+CAPTURE2.timerClkPrescale                   = 2;
+CAPTURE2.captMode                           = "COMBINED_UP";
+CAPTURE2.interrupts                         = ["CC0_DN","CC0_UP"];
 CAPTURE2.peripheral.$assign                 = "TIMA1";
 CAPTURE2.peripheral.ccp0Pin.$assign         = "PA17";
 CAPTURE2.ccp0PinConfig.hideOutputInversion  = scripting.forceWrite(false);

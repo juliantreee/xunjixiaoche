@@ -29,30 +29,23 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+#include <stdio.h>
 #include "ti_msp_dl_config.h"
 #include "Motor.h"
 #include "delay.h"
 #include "Graysensor.h"
-#include "ti_msp_dl_config.h"
-#include"encoder.h"
+#include "encoder.h"
+
+
 
 int main(void)
 {
     SYSCFG_DL_init();
+    Encoder_Init();
+    Go_forward();
     while (1) 
     {
-        cospeed(50);
-        Go_forward();
-        delay_ms(3000);
-        hitbreak();
-        delay_ms(3000);
-        Go_backward();
-        delay_ms(3000);
-        stopnow();
-        
-        
+        get_period();
+        delay_us(300);
     }
-    void main (void)
-    {}
 }

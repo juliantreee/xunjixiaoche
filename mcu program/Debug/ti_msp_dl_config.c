@@ -230,23 +230,22 @@ SYSCONFIG_WEAK void SYSCFG_DL_Motor_init(void) {
 /*
  * Timer clock configuration to be sourced by BUSCLK /  (32000000 Hz)
  * timerClkFreq = (timerClkSrc / (timerClkDivRatio * (timerClkPrescale + 1)))
- *   32000000 Hz = 32000000 Hz / (1 * (0 + 1))
+ *   16000000 Hz = 32000000 Hz / (1 * (1 + 1))
  */
 static const DL_TimerA_ClockConfig gLMotorClockConfig = {
     .clockSel    = DL_TIMER_CLOCK_BUSCLK,
     .divideRatio = DL_TIMER_CLOCK_DIVIDE_1,
-    .prescale = 0U
+    .prescale = 1U
 };
 
 /*
  * Timer load value (where the counter starts from) is calculated as (timerPeriod * timerClockFreq) - 1
- * LMotor_INST_LOAD_VALUE = (0 ms * 32000000 Hz) - 1
+ * LMotor_INST_LOAD_VALUE = (0 ms * 16000000 Hz) - 1
  */
-static const DL_TimerA_CaptureConfig gLMotorCaptureConfig = {
-    .captureMode    = DL_TIMER_CAPTURE_MODE_EDGE_TIME,
+static const DL_TimerA_CaptureCombinedConfig gLMotorCaptureConfig = {
+    .captureMode    = DL_TIMER_CAPTURE_COMBINED_MODE_PULSE_WIDTH_AND_PERIOD_UP,
     .period         = LMotor_INST_LOAD_VALUE,
     .startTimer     = DL_TIMER_STOP,
-    .edgeCaptMode   = DL_TIMER_CAPTURE_EDGE_DETECTION_MODE_RISING,
     .inputChan      = DL_TIMER_INPUT_CHAN_0,
     .inputInvMode   = DL_TIMER_CC_INPUT_INV_NOINVERT,
 };
@@ -256,8 +255,11 @@ SYSCONFIG_WEAK void SYSCFG_DL_LMotor_init(void) {
     DL_TimerA_setClockConfig(LMotor_INST,
         (DL_TimerA_ClockConfig *) &gLMotorClockConfig);
 
-    DL_TimerA_initCaptureMode(LMotor_INST,
-        (DL_TimerA_CaptureConfig *) &gLMotorCaptureConfig);
+    DL_TimerA_initCaptureCombinedMode(LMotor_INST,
+        (DL_TimerA_CaptureCombinedConfig *) &gLMotorCaptureConfig);
+    DL_TimerA_enableInterrupt(LMotor_INST , DL_TIMERA_INTERRUPT_CC0_DN_EVENT |
+		DL_TIMERA_INTERRUPT_CC0_UP_EVENT);
+
     DL_TimerA_enableClock(LMotor_INST);
 
 }
@@ -265,23 +267,22 @@ SYSCONFIG_WEAK void SYSCFG_DL_LMotor_init(void) {
 /*
  * Timer clock configuration to be sourced by BUSCLK /  (32000000 Hz)
  * timerClkFreq = (timerClkSrc / (timerClkDivRatio * (timerClkPrescale + 1)))
- *   32000000 Hz = 32000000 Hz / (1 * (0 + 1))
+ *   16000000 Hz = 32000000 Hz / (1 * (1 + 1))
  */
 static const DL_TimerA_ClockConfig gRMotorClockConfig = {
     .clockSel    = DL_TIMER_CLOCK_BUSCLK,
     .divideRatio = DL_TIMER_CLOCK_DIVIDE_1,
-    .prescale = 0U
+    .prescale = 1U
 };
 
 /*
  * Timer load value (where the counter starts from) is calculated as (timerPeriod * timerClockFreq) - 1
- * RMotor_INST_LOAD_VALUE = (0 ms * 32000000 Hz) - 1
+ * RMotor_INST_LOAD_VALUE = (0 ms * 16000000 Hz) - 1
  */
-static const DL_TimerA_CaptureConfig gRMotorCaptureConfig = {
-    .captureMode    = DL_TIMER_CAPTURE_MODE_EDGE_TIME,
+static const DL_TimerA_CaptureCombinedConfig gRMotorCaptureConfig = {
+    .captureMode    = DL_TIMER_CAPTURE_COMBINED_MODE_PULSE_WIDTH_AND_PERIOD_UP,
     .period         = RMotor_INST_LOAD_VALUE,
     .startTimer     = DL_TIMER_STOP,
-    .edgeCaptMode   = DL_TIMER_CAPTURE_EDGE_DETECTION_MODE_RISING,
     .inputChan      = DL_TIMER_INPUT_CHAN_0,
     .inputInvMode   = DL_TIMER_CC_INPUT_INV_NOINVERT,
 };
@@ -291,8 +292,11 @@ SYSCONFIG_WEAK void SYSCFG_DL_RMotor_init(void) {
     DL_TimerA_setClockConfig(RMotor_INST,
         (DL_TimerA_ClockConfig *) &gRMotorClockConfig);
 
-    DL_TimerA_initCaptureMode(RMotor_INST,
-        (DL_TimerA_CaptureConfig *) &gRMotorCaptureConfig);
+    DL_TimerA_initCaptureCombinedMode(RMotor_INST,
+        (DL_TimerA_CaptureCombinedConfig *) &gRMotorCaptureConfig);
+    DL_TimerA_enableInterrupt(RMotor_INST , DL_TIMERA_INTERRUPT_CC0_DN_EVENT |
+		DL_TIMERA_INTERRUPT_CC0_UP_EVENT);
+
     DL_TimerA_enableClock(RMotor_INST);
 
 }

@@ -28,7 +28,7 @@ void MotorR_break()
     DL_GPIO_setPins(MotorRCtl_PORT, MotorRCtl_Ain2_PIN);
 }
 
-void MotorR_speed(char speed)
+void MotorR_speed(double speed)
 {
     DL_Timer_setCaptureCompareValue(Motor_INST, (uint32_t)speed*16*speed_r, GPIO_Motor_C1_IDX);
 }
@@ -58,7 +58,7 @@ void MotorL_break()
     DL_GPIO_setPins(MotorLCtl_Bin2_PORT, MotorLCtl_Bin2_PIN);
 }
 
-void MotorL_speed(char speed)
+void MotorL_speed(double speed)
 {
     DL_Timer_setCaptureCompareValue(Motor_INST, (uint32_t)speed*16*speed_l, GPIO_Motor_C0_IDX);
 }
@@ -88,7 +88,7 @@ void hitbreak()
     MotorR_break();
 }
 
-void cospeed(char speed)
+void cospeed(double speed)
 {
     MotorL_speed(speed);
     MotorR_speed(speed);
