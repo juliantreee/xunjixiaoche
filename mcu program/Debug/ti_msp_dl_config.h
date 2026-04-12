@@ -123,6 +123,22 @@ extern "C" {
 
 
 
+
+/* Defines for I2C_OLED */
+#define I2C_OLED_INST                                                       I2C1
+#define I2C_OLED_INST_IRQHandler                                 I2C1_IRQHandler
+#define I2C_OLED_INST_INT_IRQN                                     I2C1_INT_IRQn
+#define I2C_OLED_BUS_SPEED_HZ                                             400000
+#define GPIO_I2C_OLED_SDA_PORT                                             GPIOA
+#define GPIO_I2C_OLED_SDA_PIN                                      DL_GPIO_PIN_3
+#define GPIO_I2C_OLED_IOMUX_SDA                                   (IOMUX_PINCM8)
+#define GPIO_I2C_OLED_IOMUX_SDA_FUNC                    IOMUX_PINCM8_PF_I2C1_SDA
+#define GPIO_I2C_OLED_SCL_PORT                                             GPIOB
+#define GPIO_I2C_OLED_SCL_PIN                                      DL_GPIO_PIN_2
+#define GPIO_I2C_OLED_IOMUX_SCL                                  (IOMUX_PINCM15)
+#define GPIO_I2C_OLED_IOMUX_SCL_FUNC                   IOMUX_PINCM15_PF_I2C1_SCL
+
+
 /* Defines for UART_0 */
 #define UART_0_INST                                                        UART0
 #define UART_0_INST_FREQUENCY                                           32000000
@@ -150,6 +166,18 @@ extern "C" {
 /* Defines for read: GPIOA.1 with pinCMx 2 on package pin 34 */
 #define Grayread_read_PIN                                        (DL_GPIO_PIN_1)
 #define Grayread_read_IOMUX                                       (IOMUX_PINCM2)
+/* Port definition for Pin Group KEY1 */
+#define KEY1_PORT                                                        (GPIOB)
+
+/* Defines for PIN_23: GPIOB.23 with pinCMx 51 on package pin 22 */
+#define KEY1_PIN_23_PIN                                         (DL_GPIO_PIN_23)
+#define KEY1_PIN_23_IOMUX                                        (IOMUX_PINCM51)
+/* Port definition for Pin Group KEY2 */
+#define KEY2_PORT                                                        (GPIOB)
+
+/* Defines for PIN_26: GPIOB.26 with pinCMx 57 on package pin 28 */
+#define KEY2_PIN_26_PIN                                         (DL_GPIO_PIN_26)
+#define KEY2_PIN_26_IOMUX                                        (IOMUX_PINCM57)
 /* Defines for Bin1: GPIOA.7 with pinCMx 14 on package pin 49 */
 #define MotorLCtl_Bin1_PORT                                              (GPIOA)
 #define MotorLCtl_Bin1_PIN                                       (DL_GPIO_PIN_7)
@@ -190,6 +218,7 @@ void SYSCFG_DL_SYSCTL_init(void);
 void SYSCFG_DL_Motor_init(void);
 void SYSCFG_DL_LMotor_init(void);
 void SYSCFG_DL_RMotor_init(void);
+void SYSCFG_DL_I2C_OLED_init(void);
 void SYSCFG_DL_UART_0_init(void);
 
 

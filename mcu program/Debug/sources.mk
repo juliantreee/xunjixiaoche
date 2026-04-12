@@ -119,4 +119,5 @@ GEN_OPTS__QUOTED :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 . \
+OLED/OLED_Hardware_I2C \
 

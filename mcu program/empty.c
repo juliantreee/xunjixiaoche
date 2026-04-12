@@ -35,7 +35,9 @@
 #include "delay.h"
 #include "Graysensor.h"
 #include "encoder.h"
-
+#include "menu.h"
+#include "clock.h"
+#include "oled_menu.h"
 
 
 int main(void)

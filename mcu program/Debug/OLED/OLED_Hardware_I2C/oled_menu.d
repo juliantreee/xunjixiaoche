@@ -1,6 +1,7 @@
 # FIXED
 
-Graysensor.o: ../Graysensor.c \
+OLED/OLED_Hardware_I2C/oled_menu.o: ../OLED/OLED_Hardware_I2C/oled_menu.c \
+ ../OLED/OLED_Hardware_I2C/oled_menu.h \
  ti_msp_dl_config.h \
  F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/devices/msp/msp.h \
  F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/devices/DeviceFamily.h \
@@ -84,7 +85,8 @@ Graysensor.o: ../Graysensor.c \
  F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h \
  F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h \
  F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h \
- ../delay.h ../Graysensor.h ../Motor.h
+ ../OLED/OLED_Hardware_I2C/oledfont.h ../OLED/OLED_Hardware_I2C/clock.h
+../OLED/OLED_Hardware_I2C/oled_menu.h:
 ti_msp_dl_config.h:
 F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/devices/msp/msp.h:
 F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/devices/DeviceFamily.h:
@@ -168,6 +170,5 @@ F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_vref.h:
 F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h:
 F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h:
 F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h:
-../delay.h:
-../Graysensor.h:
-../Motor.h:
+../OLED/OLED_Hardware_I2C/oledfont.h:
+../OLED/OLED_Hardware_I2C/clock.h:
