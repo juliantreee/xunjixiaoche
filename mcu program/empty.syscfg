@@ -27,6 +27,7 @@ const UART1    = UART.addInstance();
  * Write custom configuration values to the imported modules.
  */
 CAPTURE1.$name                              = "LMotor";
+CAPTURE1.captFilter                         = true;
 CAPTURE1.peripheral.$assign                 = "TIMA0";
 CAPTURE1.peripheral.ccp0Pin.$assign         = "PB8";
 CAPTURE1.ccp0PinConfig.hideOutputInversion  = scripting.forceWrite(false);

@@ -258,6 +258,11 @@ SYSCONFIG_WEAK void SYSCFG_DL_LMotor_init(void) {
 
     DL_TimerA_initCaptureMode(LMotor_INST,
         (DL_TimerA_CaptureConfig *) &gLMotorCaptureConfig);
+    DL_Timer_setCaptureCompareInputFilter(LMotor_INST,
+        DL_TIMER_CC_INPUT_FILT_CPV_CONSEC_PER, DL_TIMER_CC_INPUT_FILT_FP_PER_3,
+        DL_TIMER_CC_0_INDEX);
+    DL_Timer_enableCaptureCompareInputFilter(LMotor_INST,
+        DL_TIMER_CC_0_INDEX);
     DL_TimerA_enableClock(LMotor_INST);
 
 }
