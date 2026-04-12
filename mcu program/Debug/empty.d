@@ -1,7 +1,6 @@
 # FIXED
 
-OLED/OLED_Hardware_I2C/oled_menu.o: ../OLED/OLED_Hardware_I2C/oled_menu.c \
- ../OLED/OLED_Hardware_I2C/oled_menu.h \
+empty.o: ../empty.c \
  ti_msp_dl_config.h \
  F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/devices/msp/msp.h \
  F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/devices/DeviceFamily.h \
@@ -85,9 +84,9 @@ OLED/OLED_Hardware_I2C/oled_menu.o: ../OLED/OLED_Hardware_I2C/oled_menu.c \
  F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h \
  F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h \
  F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h \
- ../OLED/OLED_Hardware_I2C/oledfont.h ../OLED/OLED_Hardware_I2C/clock.h \
- F:/PROJECT/git\ for\ xunjixiaoche/xunjixiaoche/mcu\ program/delay.h
-../OLED/OLED_Hardware_I2C/oled_menu.h:
+ ../Motor.h ../delay.h ../Graysensor.h ../encoder.h \
+ ../OLED/OLED_Hardware_I2C/menu.h ../OLED/OLED_Hardware_I2C/oled_menu.h \
+ ../OLED/OLED_Hardware_I2C/clock.h
 ti_msp_dl_config.h:
 F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/devices/msp/msp.h:
 F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/devices/DeviceFamily.h:
@@ -171,6 +170,10 @@ F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_vref.h:
 F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h:
 F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h:
 F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h:
-../OLED/OLED_Hardware_I2C/oledfont.h:
+../Motor.h:
+../delay.h:
+../Graysensor.h:
+../encoder.h:
+../OLED/OLED_Hardware_I2C/menu.h:
+../OLED/OLED_Hardware_I2C/oled_menu.h:
 ../OLED/OLED_Hardware_I2C/clock.h:
-F:/PROJECT/git\ for\ xunjixiaoche/xunjixiaoche/mcu\ program/delay.h:

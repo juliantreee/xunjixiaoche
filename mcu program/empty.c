@@ -35,11 +35,9 @@
 #include "delay.h"
 #include "Graysensor.h"
 #include "encoder.h"
-#include "menu.h"
-#include "clock.h"
-#include "oled_menu.h"
-
-
+#include "OLED/OLED_Hardware_I2C/menu.h"
+#include "OLED/OLED_Hardware_I2C/oled_menu.h"
+#include "OLED/OLED_Hardware_I2C/clock.h"
 int main(void)
 {
     SYSCFG_DL_init();

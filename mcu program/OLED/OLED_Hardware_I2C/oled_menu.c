@@ -1,7 +1,7 @@
 #include "oled_menu.h"
 #include "oledfont.h"       // 包含点阵字库
 #include "clock.h"
-
+#include "delay.h"
 #define I2C_TIMEOUT_MS  (10)
 
 uint8_t OLED_GRAM[128][8] = {0};  // 初始化为全0
@@ -17,10 +17,7 @@ uint8_t OLED_GRAM[128][8] = {0};  // 初始化为全0
 //[6]0 1 2 3 ... 127	
 //[7]0 1 2 3 ... 127
 
-void delay_ms(uint32_t ms)
-{
-    mspm0_delay_ms(ms);
-}
+
 
 static int mspm0_i2c_disable(void)
 {

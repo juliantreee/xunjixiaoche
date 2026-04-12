@@ -8,7 +8,7 @@
 
 extern uint8_t OLED_GRAM[128][8];
 //OLED控制用函数
-void delay_ms(uint32_t ms);
+
 // void OLED_ColorTurn(uint8_t i);
 void OLED_Refresh(uint8_t x, uint8_t page_start, uint8_t width, uint8_t page_count);
 void OLED_ColorTurn(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
