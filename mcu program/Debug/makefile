@@ -4,7 +4,7 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := F:/ide/ccs/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS
+CG_TOOL_ROOT := G:/CCS/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS
 
 GEN_OPTS__FLAG := @"./device.opt" 
 GEN_CMDS__FLAG := -Wl,-l"./device_linker.cmd" 
@@ -138,7 +138,7 @@ all: $(OBJS) $(GEN_CMDS)
 # Tool invocations
 gpio.out: $(OBJS) $(GEN_CMDS)
 	@echo 'Arm Linker - building target: "$@"'
-	"F:/ide/ccs/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin/tiarmclang.exe" @"device.opt"  -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O2 -gdwarf-3 -Wall -Wl,-m"gpio.map" -Wl,-i"F:/ide/ccs/mspm0_sdk_2_10_00_04/source" -Wl,-i"F:/PROJECT/git for xunjixiaoche/xunjixiaoche/mcu program" -Wl,-i"F:/PROJECT/git for xunjixiaoche/xunjixiaoche/mcu program/Debug/syscfg" -Wl,-i"F:/ide/ccs/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/lib" -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--xml_link_info="gpio_linkInfo.xml" -Wl,--rom_model -o "gpio.out" $(ORDERED_OBJS)
+	"G:/CCS/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin/tiarmclang.exe" @"device.opt"  -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O2 -gdwarf-3 -Wall -Wl,-m"gpio.map" -Wl,-i"C:/TI/mspm0_sdk_2_10_00_04/source" -Wl,-i"G:/xunjixiaoche/mcu program" -Wl,-i"G:/xunjixiaoche/mcu program/Debug/syscfg" -Wl,-i"G:/CCS/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/lib" -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--xml_link_info="gpio_linkInfo.xml" -Wl,--rom_model -o "gpio.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 

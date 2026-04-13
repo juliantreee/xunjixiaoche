@@ -14,7 +14,7 @@ C_SRCS += \
 ../delay.c \
 ../empty.c \
 ./ti_msp_dl_config.c \
-F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/devices/msp/m0p/startup_system_files/ticlang/startup_mspm0g350x_ticlang.c \
+C:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/msp/m0p/startup_system_files/ticlang/startup_mspm0g350x_ticlang.c \
 ../encoder.c 
 
 GEN_CMDS += \
@@ -85,7 +85,7 @@ C_SRCS__QUOTED += \
 "../delay.c" \
 "../empty.c" \
 "./ti_msp_dl_config.c" \
-"F:/ide/ccs/mspm0_sdk_2_10_00_04/source/ti/devices/msp/m0p/startup_system_files/ticlang/startup_mspm0g350x_ticlang.c" \
+"C:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/msp/m0p/startup_system_files/ticlang/startup_mspm0g350x_ticlang.c" \
 "../encoder.c" 
 
 SYSCFG_SRCS__QUOTED += \

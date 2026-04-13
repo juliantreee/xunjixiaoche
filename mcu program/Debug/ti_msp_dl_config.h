@@ -98,28 +98,15 @@ extern "C" {
 
 
 /* Defines for LMotor */
-#define LMotor_INST                                                      (TIMA0)
-#define LMotor_INST_IRQHandler                                  TIMA0_IRQHandler
-#define LMotor_INST_INT_IRQN                                    (TIMA0_INT_IRQn)
+#define LMotor_INST                                                      (TIMG7)
+#define LMotor_INST_IRQHandler                                  TIMG7_IRQHandler
+#define LMotor_INST_INT_IRQN                                    (TIMG7_INT_IRQn)
 #define LMotor_INST_LOAD_VALUE                                              (0U)
-/* GPIO defines for channel 0 */
-#define GPIO_LMotor_C0_PORT                                                GPIOB
-#define GPIO_LMotor_C0_PIN                                         DL_GPIO_PIN_8
-#define GPIO_LMotor_C0_IOMUX                                     (IOMUX_PINCM25)
-#define GPIO_LMotor_C0_IOMUX_FUNC                    IOMUX_PINCM25_PF_TIMA0_CCP0
-
 /* Defines for RMotor */
-#define RMotor_INST                                                      (TIMA1)
-#define RMotor_INST_IRQHandler                                  TIMA1_IRQHandler
-#define RMotor_INST_INT_IRQN                                    (TIMA1_INT_IRQn)
+#define RMotor_INST                                                      (TIMG6)
+#define RMotor_INST_IRQHandler                                  TIMG6_IRQHandler
+#define RMotor_INST_INT_IRQN                                    (TIMG6_INT_IRQn)
 #define RMotor_INST_LOAD_VALUE                                              (0U)
-/* GPIO defines for channel 0 */
-#define GPIO_RMotor_C0_PORT                                                GPIOA
-#define GPIO_RMotor_C0_PIN                                        DL_GPIO_PIN_17
-#define GPIO_RMotor_C0_IOMUX                                     (IOMUX_PINCM39)
-#define GPIO_RMotor_C0_IOMUX_FUNC                    IOMUX_PINCM39_PF_TIMA1_CCP0
-
-
 
 
 
@@ -129,10 +116,10 @@ extern "C" {
 #define I2C_OLED_INST_IRQHandler                                 I2C1_IRQHandler
 #define I2C_OLED_INST_INT_IRQN                                     I2C1_INT_IRQn
 #define I2C_OLED_BUS_SPEED_HZ                                             400000
-#define GPIO_I2C_OLED_SDA_PORT                                             GPIOA
+#define GPIO_I2C_OLED_SDA_PORT                                             GPIOB
 #define GPIO_I2C_OLED_SDA_PIN                                      DL_GPIO_PIN_3
-#define GPIO_I2C_OLED_IOMUX_SDA                                   (IOMUX_PINCM8)
-#define GPIO_I2C_OLED_IOMUX_SDA_FUNC                    IOMUX_PINCM8_PF_I2C1_SDA
+#define GPIO_I2C_OLED_IOMUX_SDA                                  (IOMUX_PINCM16)
+#define GPIO_I2C_OLED_IOMUX_SDA_FUNC                   IOMUX_PINCM16_PF_I2C1_SDA
 #define GPIO_I2C_OLED_SCL_PORT                                             GPIOB
 #define GPIO_I2C_OLED_SCL_PIN                                      DL_GPIO_PIN_2
 #define GPIO_I2C_OLED_IOMUX_SCL                                  (IOMUX_PINCM15)
@@ -207,6 +194,22 @@ extern "C" {
 /* Defines for AD2: GPIOA.31 with pinCMx 6 on package pin 39 */
 #define Gray_AD2_PIN                                            (DL_GPIO_PIN_31)
 #define Gray_AD2_IOMUX                                            (IOMUX_PINCM6)
+/* Defines for L_encoder: GPIOB.8 with pinCMx 25 on package pin 60 */
+#define Encoder_L_encoder_PORT                                           (GPIOB)
+// pins affected by this interrupt request:["L_encoder"]
+#define Encoder_GPIOB_INT_IRQN                                  (GPIOB_INT_IRQn)
+#define Encoder_GPIOB_INT_IIDX                  (DL_INTERRUPT_GROUP1_IIDX_GPIOB)
+#define Encoder_L_encoder_IIDX                               (DL_GPIO_IIDX_DIO8)
+#define Encoder_L_encoder_PIN                                    (DL_GPIO_PIN_8)
+#define Encoder_L_encoder_IOMUX                                  (IOMUX_PINCM25)
+/* Defines for R_encoder: GPIOA.17 with pinCMx 39 on package pin 10 */
+#define Encoder_R_encoder_PORT                                           (GPIOA)
+// pins affected by this interrupt request:["R_encoder"]
+#define Encoder_GPIOA_INT_IRQN                                  (GPIOA_INT_IRQn)
+#define Encoder_GPIOA_INT_IIDX                  (DL_INTERRUPT_GROUP1_IIDX_GPIOA)
+#define Encoder_R_encoder_IIDX                              (DL_GPIO_IIDX_DIO17)
+#define Encoder_R_encoder_PIN                                   (DL_GPIO_PIN_17)
+#define Encoder_R_encoder_IOMUX                                  (IOMUX_PINCM39)
 
 
 /* clang-format on */

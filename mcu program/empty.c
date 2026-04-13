@@ -41,11 +41,15 @@
 int main(void)
 {
     SYSCFG_DL_init();
+    delay_ms(500);
+    SysTick_Init();
+    delay_ms(500);
+    OLED_Init();
     Encoder_Init();
-    Go_forward();
+    delay_ms(500);
     while (1) 
     {
-        get_period();
-        delay_us(300);
+        menu0();
+        delay_ms(100);
     }
 }
