@@ -92,3 +92,16 @@ float Track_Err(void)//这个源码里面是传了一个uint16_t car_state但是
         default: Err = 0; break;//没定义情况
     }
 }
+void getgraylocation(void)
+{
+    double x;//用这个接受亮灯的均值坐标
+    double z=0;//z是灰度识别到黑线的数量
+    for(int i=0;i<=7;i++)
+    {
+        if (gray_value[i]==1) {
+        z+=1;
+        x+=(double)i;//这个不一定塞得满,到0时就不要用了
+        }
+    }
+    x=x/z;//均值坐标
+}
