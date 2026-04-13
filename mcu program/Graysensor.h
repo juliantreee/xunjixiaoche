@@ -7,5 +7,6 @@ void select_channel(uint8_t channel);
 bool Gray_read();
 void Gray_read_all(); //save data to gray_value[]
 void Read_Track_Data(uint8_t* arr);
+void getgraylocation(void)//灰度传感器的位置
 float Track_Err(void);
 #endif
