@@ -104,4 +104,5 @@ void getgraylocation(void)
         }
     }
     x=x/z;//均值坐标
+    return x;
 }
