@@ -81,7 +81,7 @@ int menu0(void){
      // OLED_Refresh(54, 2, 74, 2); // 假设每行菜单占16像素，即2页
 
 
-
+/*
     while(1) {
         OLED_ShowNum(54,6,flag,1,16);
         keynum = getnum();
@@ -139,3 +139,4 @@ int menu0(void){
         
     }
 }
+*/
