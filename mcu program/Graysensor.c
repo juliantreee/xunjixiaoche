@@ -68,33 +68,32 @@ void Read_Track_Data(uint8_t* arr)//读取赛道数据,这个arr是一个数组,
 }
 float Track_Err(void)//这个源码里面是传了一个uint16_t car_state但是没有用到，看他源码应该是pid时车的什么值
 {
-    float Err;//给速度的值
     switch (TrackN) 
     {
-        case 0xe7: Err = 0; break;//中间
-        case 0xcf: Err = 3.5; break;//右侧小偏差 减小值使转向平缓
-        case 0x9f: Err = 5.0; break;//右侧中等偏差
-        case 0x3f: Err = 6.0; break;//右侧大偏差 减大值使转向平缓
-        case 0xf3: Err = -3.5; break;//左侧小偏差 减小值使转向平缓
-        case 0xf9: Err = -5.0; break;//左侧中等偏差
-        case 0xfc: Err = -6.0; break;//左侧大偏差 减大值使转向平缓
-        case 0xef: Err = 2.0; break;//右侧轻微偏差
-        case 0xdf: Err = 3.0; break;//右侧中小偏差
-        case 0xbf: Err = 3.5; break;//右侧中小偏差
-        case 0x7f: Err = 7.0; break;//左侧极大偏差 大幅增大
-        case 0xf7: Err = -2.0; break;//左侧轻微偏差
-        case 0xfb: Err = -3.0; break;//左侧中小偏差
-        case 0xfd: Err = -4.5; break;//左侧中小偏差
-        case 0xfe: Err = -7.0; break;//左侧极大偏差 大幅增大
-        case 0x1f: Err = 8.0; break;//右侧极限偏差 特别大
-        case 0xf8: Err = -3.0; break;//左侧中小偏差
-        case 0x8f: Err = 9.0; break;//右侧极限偏差 特别大的值
-        default: Err = 0; break;//没定义情况
+        case 0xe7: return 0.0; break;//中间
+        case 0xcf: return 3.5; break;//右侧小偏差 减小值使转向平缓
+        case 0x9f: return 5.0; break;//右侧中等偏差
+        case 0x3f: return 6.0; break;//右侧大偏差 减大值使转向平缓
+        case 0xf3: return -3.5; break;//左侧小偏差 减小值使转向平缓
+        case 0xf9: return -5.0; break;//左侧中等偏差
+        case 0xfc: return -6.0; break;//左侧大偏差 减大值使转向平缓
+        case 0xef: return 2.0; break;//右侧轻微偏差
+        case 0xdf: return 3.0; break;//右侧中小偏差
+        case 0xbf: return 3.5; break;//右侧中小偏差
+        case 0x7f: return 7.0; break;//左侧极大偏差 大幅增大
+        case 0xf7: return -2.0; break;//左侧轻微偏差
+        case 0xfb: return -3.0; break;//左侧中小偏差
+        case 0xfd: return -4.5; break;//左侧中小偏差
+        case 0xfe: return -7.0; break;//左侧极大偏差 大幅增大
+        case 0x1f: return 8.0; break;//右侧极限偏差 特别大
+        case 0xf8: return -3.0; break;//左侧中小偏差
+        case 0x8f: return 9.0; break;//右侧极限偏差 特别大的值
+        default: return 0.0; break;//没定义情况
     }
 }
-void getgraylocation(void)
+double getgraylocation(void)
 {
-    double x;//用这个接受亮灯的均值坐标
+    double x=0;//用这个接受亮灯的均值坐标
     double z=0;//z是灰度识别到黑线的数量
     for(int i=0;i<=7;i++)
     {
