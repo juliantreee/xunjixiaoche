@@ -15,8 +15,8 @@ static volatile bool     RgCapDone;          // 测量完成标志
 static volatile bool     RgFirstEdge;        // 是否已捕获第一个边沿
 
 
-static volatile uint32_t Lmotor_period;
-static volatile uint32_t Rmotor_period;
+static volatile uint32_t Lmotor_period;   //周期，计数值
+static volatile uint32_t Rmotor_period;   //周期，计数值
 
 static double Lmotor_angspeed; //弧度速度
 static double Rmotor_angspeed; //弧度速度
@@ -28,7 +28,7 @@ void Encoder_Init(void)
     RgFirstEdge = false;
     RgCapDone   = false;
 
-    gLoadValue = DL_TimerG_getLoadValue(LMotor_INST);
+    gLoadValue = DL_TimerG_getLoadValue(LMotor_INST);//获取重载值，存储到gLoadValue
 
     //调试时停止定时器
     DL_TimerG_setCoreHaltBehavior(LMotor_INST, DL_TIMER_CORE_HALT_IMMEDIATE);
@@ -64,7 +64,7 @@ void get_period(void)
     NVIC_EnableIRQ(Encoder_GPIOA_INT_IRQN);
     NVIC_EnableIRQ(Encoder_GPIOB_INT_IRQN);
 
-    while (LgCapDone == false || RgCapDone == false)
+    while (LgCapDone == false || RgCapDone == false) //等待中断
     {
         __WFI();
     }
@@ -81,19 +81,19 @@ void get_period(void)
 
 //中断函数
 
-void GROUP1_IRQHandler()
+void GROUP1_IRQHandler()  //gpio中断
 {
     switch (DL_Interrupt_getPendingGroup(DL_INTERRUPT_GROUP_1))
     {
-        case Encoder_GPIOA_INT_IIDX:
-            if(RgFirstEdge == false)
+        case Encoder_GPIOA_INT_IIDX: //若为右电机中断
+            if(RgFirstEdge == false) //首次捕获边沿
             {
                 RgCapVal1 = DL_TimerG_getTimerCount(RMotor_INST);
                 DL_GPIO_clearInterruptStatus(GPIOA, 17);
                 RgFirstEdge = true;
                 break;
             }
-            else 
+            else                     //第二次捕获边沿
             {
                 RgCapVal2 = DL_TimerG_getTimerCount(RMotor_INST);
                 NVIC_DisableIRQ(Encoder_GPIOA_INT_IRQN);
@@ -103,15 +103,15 @@ void GROUP1_IRQHandler()
                 RgCapDone = true;
                 break;
             }
-        case Encoder_GPIOB_INT_IIDX:
-            if(LgFirstEdge == false)
+        case Encoder_GPIOB_INT_IIDX: //若为左电机中断
+            if(LgFirstEdge == false) //首次捕获边沿
             {
                 LgCapVal1 = DL_TimerG_getTimerCount(LMotor_INST);
                 DL_GPIO_clearInterruptStatus(GPIOB, 8);
                 LgFirstEdge = true;
                 break;
             }
-            else
+            else                     //第二次捕获边沿
             {
                 LgCapVal2 = DL_TimerG_getTimerCount(LMotor_INST);
                 NVIC_DisableIRQ(Encoder_GPIOB_INT_IRQN);
@@ -126,6 +126,7 @@ void GROUP1_IRQHandler()
     }
 }
 
+//定时器溢出中断，视为电机转速过低，将周期设为最大值
 void LMotor_INST_IRQHandler(void)
 {
     LgCapDone = true;
