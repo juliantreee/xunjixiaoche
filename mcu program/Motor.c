@@ -1,8 +1,6 @@
 #include "ti_msp_dl_config.h"
 #include "Motor.h"
 
-double speed_l = 1.00;
-double speed_r = 1.00;
 
 void MotorR_forward()
 {
@@ -22,7 +20,7 @@ void MotorR_stop()
     DL_GPIO_clearPins(MotorRCtl_PORT, MotorRCtl_Ain2_PIN);
 }
 
-void MotorR_break()
+void MotorR_brake()
 {
     DL_GPIO_setPins(MotorRCtl_PORT, MotorRCtl_Ain1_PIN);
     DL_GPIO_setPins(MotorRCtl_PORT, MotorRCtl_Ain2_PIN);
@@ -30,7 +28,7 @@ void MotorR_break()
 
 void MotorR_speed(double speed)
 {
-    DL_Timer_setCaptureCompareValue(Motor_INST, (uint32_t)speed*16*speed_r, GPIO_Motor_C1_IDX);
+    DL_Timer_setCaptureCompareValue(Motor_INST, (uint32_t)speed*16, GPIO_Motor_C1_IDX);
 }
 
 
@@ -52,7 +50,7 @@ void MotorL_stop()
     DL_GPIO_clearPins(MotorLCtl_Bin2_PORT, MotorLCtl_Bin2_PIN);
 }
 
-void MotorL_break()
+void MotorL_brake()
 {
     DL_GPIO_setPins(MotorLCtl_Bin1_PORT, MotorLCtl_Bin1_PIN);
     DL_GPIO_setPins(MotorLCtl_Bin2_PORT, MotorLCtl_Bin2_PIN);
@@ -60,7 +58,7 @@ void MotorL_break()
 
 void MotorL_speed(double speed)
 {
-    DL_Timer_setCaptureCompareValue(Motor_INST, (uint32_t)speed*16*speed_l, GPIO_Motor_C0_IDX);
+    DL_Timer_setCaptureCompareValue(Motor_INST, (uint32_t)speed*16, GPIO_Motor_C0_IDX);
 }
 
 
@@ -82,10 +80,10 @@ void stopnow()
     MotorR_stop();
 }
 
-void hitbreak()
+void hitbrake()
 {
-    MotorL_break();
-    MotorR_break();
+    MotorL_brake();
+    MotorR_brake();
 }
 
 void cospeed(double speed)

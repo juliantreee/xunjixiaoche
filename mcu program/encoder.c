@@ -18,8 +18,8 @@ static volatile bool     RgFirstEdge;        // 是否已捕获第一个边沿
 static volatile uint32_t Lmotor_period;   //周期，计数值
 static volatile uint32_t Rmotor_period;   //周期，计数值
 
-static double Lmotor_angspeed; //弧度速度
-static double Rmotor_angspeed; //弧度速度
+static double Lmotor_RPM; //电机转速
+static double Rmotor_RPM; //电机转速
 
 void Encoder_Init(void)
 {
@@ -73,8 +73,8 @@ void get_period(void)
     //计算
     Lmotor_period = LgCapVal1 - LgCapVal2;
     Rmotor_period = RgCapVal1 - RgCapVal2;
-    Lmotor_angspeed = (PII/PPR)/(Lmotor_period/Timerf);
-    Rmotor_angspeed = (PII/PPR)/(Rmotor_period/Timerf);
+    Lmotor_RPM = (1.0/PPR)/(Lmotor_period/Timerf);
+    Rmotor_RPM = (1.0/PPR)/(Rmotor_period/Timerf);
 
 }
 
