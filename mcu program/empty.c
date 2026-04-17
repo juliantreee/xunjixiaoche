@@ -35,21 +35,24 @@
 #include "delay.h"
 #include "Graysensor.h"
 #include "encoder.h"
-#include "OLED/OLED_Hardware_I2C/menu.h"
-#include "OLED/OLED_Hardware_I2C/oled_menu.h"
-#include "OLED/OLED_Hardware_I2C/clock.h"
+#include "oled.h"
+
+#include <ti/driverlib/m0p/dl_interrupt.h>
 int main(void)
 {
     SYSCFG_DL_init();
     delay_us(100);
-    SysTick_Init();
-    delay_ms(100);
-    OLED_Init();
     Encoder_Init();
-    delay_ms(100);
+    delay_us(100);
+    OLED_Init();
+    OLED_ColorTurn(0);
+    OLED_Clear();
+    delay_us(100);
     while (1) 
     {
-        menu0();
-        delay_ms(100);
+        OLED_ShowString(0, 0,"HELLO WORLD", 16);
+        OLED_Refresh();
+        delay_ms(500);
+        
     }
 }
