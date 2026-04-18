@@ -1,6 +1,7 @@
 #ifndef ENCODER_H_
 #define ENCODER_H_
 
+#include "ti_msp_dl_config.h"
 #define PPR 1000  //线数
 #define Timerf 8000000.0  //计时器频率
 

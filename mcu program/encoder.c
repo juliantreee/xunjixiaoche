@@ -1,7 +1,6 @@
 #include "ti_msp_dl_config.h"
 #include "encoder.h"
-
-
+#include <ti/driverlib/m0p/dl_interrupt.h>
 static volatile uint32_t LgCapVal1;          // 第一个变化沿捕获值
 static volatile uint32_t LgCapVal2;          // 第二个变化沿捕获值
 static volatile bool     LgCapDone;          // 测量完成标志
