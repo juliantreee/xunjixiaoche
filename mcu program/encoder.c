@@ -15,7 +15,24 @@ void Encoder_Init(void)
     RD = false;
     Ltimeout = false;
     Rtimeout = false;
+
+
+    DL_TimerG_clearInterruptStatus(LMotor_INST, DL_TIMER_IIDX_ZERO);
+    DL_TimerG_clearInterruptStatus(RMotor_INST, DL_TIMER_IIDX_ZERO);
+
+    DL_GPIO_clearInterruptStatus(Encoder_L_encoder_PORT, Encoder_L_encoder_PIN);
+    DL_GPIO_clearInterruptStatus(Encoder_R_encoder_PORT, Encoder_R_encoder_PIN);
+
+    NVIC_DisableIRQ(LMotor_INST_INT_IRQN);
     NVIC_DisableIRQ(RMotor_INST_INT_IRQN);
+    NVIC_DisableIRQ(Encoder_GPIOB_INT_IRQN);
+
+    NVIC_ClearPendingIRQ(LMotor_INST_INT_IRQN);
+    NVIC_ClearPendingIRQ(RMotor_INST_INT_IRQN);
+    NVIC_ClearPendingIRQ(Encoder_GPIOB_INT_IRQN);
+
+    __DSB();
+    __ISB();
 }
 
 double get_l_speed(void)
@@ -24,6 +41,11 @@ double get_l_speed(void)
     LF = false;
     LD = false;
     Ltimeout = false;
+
+    NVIC_ClearPendingIRQ(LMotor_INST_INT_IRQN);
+    NVIC_ClearPendingIRQ(Encoder_GPIOB_INT_IRQN);
+    __DSB();
+    __ISB();
 
     DL_TimerG_setTimerCount(LMotor_INST, 65535);//重置定时器计数值
     DL_TimerG_startCounter(LMotor_INST);//启动定时器
@@ -38,9 +60,15 @@ double get_l_speed(void)
     //失能中断
     NVIC_DisableIRQ(Encoder_GPIOB_INT_IRQN);
     NVIC_DisableIRQ(LMotor_INST_INT_IRQN);
+
+    NVIC_ClearPendingIRQ(LMotor_INST_INT_IRQN);
+    NVIC_ClearPendingIRQ(Encoder_GPIOB_INT_IRQN);
+    __DSB();
+    __ISB();
+    
     if(Ltimeout == true) //若超时
     {
-        return (Timerf * 60.0) / ((LFCap - LSCap)*PPR);
+        return 0.1;
     }
     else
     {
@@ -72,6 +100,7 @@ void GROUP1_IRQHandler(void)
             break;
         }
         case DL_INTERRUPT_GROUP1_IIDX_GPIOA:
+        DL_GPIO_clearInterruptStatus(Encoder_R_encoder_PORT, Encoder_R_encoder_PIN);
             DL_UART_transmitData(UART0, 'R');
             break;
         default:
