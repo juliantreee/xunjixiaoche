@@ -70,9 +70,12 @@ int main(void)
 {
     SYSCFG_DL_init();
     Encoder_Init();
+    MotorL_speed(50);
+    MotorR_speed(80);
+    Go_forward();
     while (1) 
     {
-        printf("leftMotor speed: %.2f RPM",get_l_speed());
-        delay_ms(300);
+        printf("LeftMotor speed: %.2f RPM. RightMotor speed: %.2f RPM \r\n",get_l_speed(),get_r_speed());
+        delay_ms(500);
     }
 }
