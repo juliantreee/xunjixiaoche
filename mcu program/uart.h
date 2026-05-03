@@ -4,6 +4,8 @@
 
 #ifndef MCU_PROGRAM_UART_H
 #define MCU_PROGRAM_UART_H
+#include "string.h"
+#include "stdio.h"
 void Set_CurrentUART(uint8_t UART_type);
 static UART_Regs *current_uart;
 int puts(const char* _ptr);

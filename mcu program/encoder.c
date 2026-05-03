@@ -2,6 +2,9 @@
 #include "encoder.h"
 #include <ti/driverlib/m0p/dl_interrupt.h>
 #include <ti/driverlib/dl_timerg.h>
+#include "uart.h"
+#include <stdio.h>
+#include <stdbool.h>
 
 volatile bool LF,LD,RF,RD,Ltimeout,Rtimeout;
 volatile uint16_t LFCap,LSCap,RFCap,RSCap;
@@ -33,6 +36,8 @@ void Encoder_Init(void)
     //内存屏蔽保证操作完成，deepseek大夫的手笔，我也看不懂
     __DSB();
     __ISB();
+    DL_TimerG_startCounter(LMotor_INST);
+    DL_TimerG_startCounter(RMotor_INST);
 }
 
 double get_l_speed(void)
@@ -50,7 +55,7 @@ double get_l_speed(void)
     __ISB();
 
     DL_TimerG_setTimerCount(LMotor_INST, 65535);//重置定时器计数值
-    DL_TimerG_startCounter(LMotor_INST);//启动定时器
+    //DL_TimerG_startCounter(LMotor_INST);//启动定时器
     //使能中断
     NVIC_EnableIRQ(LMotor_INST_INT_IRQN);
     NVIC_EnableIRQ(Encoder_GPIOB_INT_IRQN);
@@ -75,7 +80,8 @@ double get_l_speed(void)
     }
     else
     {
-        return (Timerf * 60.0) / ((LFCap - LSCap)*PPR);
+        Lperiod = LFCap = LSCap;
+        return 192000.0/Lperiod;
     }
 }
 
@@ -94,7 +100,7 @@ double get_r_speed()
     __ISB();
 
     DL_TimerG_setTimerCount(RMotor_INST, 65535);//重置定时器计数值
-    DL_TimerG_startCounter(RMotor_INST);//启动定时器
+    //DL_TimerG_startCounter(RMotor_INST);//启动定时器
     //使能中断
     NVIC_EnableIRQ(RMotor_INST_INT_IRQN);
     NVIC_EnableIRQ(Encoder_GPIOA_INT_IRQN);
@@ -119,7 +125,8 @@ double get_r_speed()
     }
     else
     {
-        return (Timerf * 60.0) / ((RFCap - RSCap)*PPR);
+        Rperiod = RFCap -RSCap;
+        return 192000.0/Rperiod;
     }
 }
 
@@ -188,7 +195,7 @@ void RMotor_INST_IRQHandler(void)
         case DL_TIMER_IIDX_ZERO://超时
         {
             Rtimeout = true;
-            DL_Timer_clearInterruptStatus(RMotor_INST, DL_TIMER_IIDX_ZERO);
+            DL_TimerG_clearInterruptStatus(RMotor_INST, DL_TIMER_IIDX_ZERO);
             break;
         }
         default:
