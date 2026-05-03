@@ -40,30 +40,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "uart.h"
 
-int fputc(int c, FILE* stream)
-{
-    DL_UART_Main_transmitDataBlocking(UART0, c);
-    return c;
-}
-
-int fputs(const char* restrict s, FILE* restrict stream)
-{
-    uint16_t i, len;
-    len = strlen(s);
-    for (i = 0; i < len; i++)
-    {
-        DL_UART_Main_transmitDataBlocking(UART0, s[i]);
-    }
-    return len;
-}
-
-int puts(const char* _ptr)
-{
-    int count = fputs(_ptr, stdout);
-    count += fputs("\n", stdout);
-    return count;
-}
 
 
 int main(void)
