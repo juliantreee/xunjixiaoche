@@ -1,140 +1,97 @@
 #include "ti_msp_dl_config.h"
 #include "encoder.h"
 #include <ti/driverlib/m0p/dl_interrupt.h>
-static volatile uint32_t LgCapVal1;          // 第一个变化沿捕获值
-static volatile uint32_t LgCapVal2;          // 第二个变化沿捕获值
-static volatile bool     LgCapDone;          // 测量完成标志
-static volatile bool     LgFirstEdge;        // 是否已捕获第一个边沿
+#include <ti/driverlib/dl_timerg.h>
 
-static volatile uint32_t gLoadValue;        // 定时器重载值
-
-static volatile uint32_t RgCapVal1;          // 第一个变化沿捕获值
-static volatile uint32_t RgCapVal2;          // 第二个变化沿捕获值
-static volatile bool     RgCapDone;          // 测量完成标志
-static volatile bool     RgFirstEdge;        // 是否已捕获第一个边沿
-
-
-static volatile uint32_t Lmotor_period;   //周期，计数值
-static volatile uint32_t Rmotor_period;   //周期，计数值
-
-static double Lmotor_RPM; //电机转速
-static double Rmotor_RPM; //电机转速
+bool LF,LD,RF,RD,Ltimeout,Rtimeout;
+uint16_t LFCap,LSCap,RFCap,LFCap;
+uint16_t Lperiod,Rperiod;
 
 void Encoder_Init(void)
 {
-    LgFirstEdge = false;
-    LgCapDone   = false;
-    RgFirstEdge = false;
-    RgCapDone   = false;
-
-    gLoadValue = DL_TimerG_getLoadValue(LMotor_INST);//获取重载值，存储到gLoadValue
-
-    //调试时停止定时器
-    DL_TimerG_setCoreHaltBehavior(LMotor_INST, DL_TIMER_CORE_HALT_IMMEDIATE);
-    DL_TimerG_setCoreHaltBehavior(RMotor_INST, DL_TIMER_CORE_HALT_IMMEDIATE);
-
-
+    LF = false;
+    LD = false;
+    RF = false;
+    RD = false;
+    Ltimeout = false;
+    Rtimeout = false;
+    NVIC_DisableIRQ(RMotor_INST_INT_IRQN);
 }
 
-void get_period(void)
+double get_l_speed(void)
 {
-    LgFirstEdge = false;
-    LgCapDone = false;
-    RgFirstEdge = false;
-    RgCapDone = false;
- 
-    //清空中断
-    DL_GPIO_clearInterruptStatus(GPIOA, 17);
-    DL_GPIO_clearInterruptStatus(GPIOB, 8);
-    DL_TimerG_clearInterruptStatus(LMotor_INST, DL_TIMER_INTERRUPT_ZERO_EVENT);
-    DL_TimerG_clearInterruptStatus(RMotor_INST, DL_TIMER_INTERRUPT_ZERO_EVENT);
-    
+    //重置状态标识
+    LF = false;
+    LD = false;
+    Ltimeout = false;
 
-    
-    //清空定时器
-    DL_TimerG_setTimerCount(LMotor_INST, gLoadValue);
-    DL_TimerG_setTimerCount(RMotor_INST, gLoadValue);
-    //启动定时器
-    DL_TimerG_startCounter(LMotor_INST);
-    DL_TimerG_startCounter(RMotor_INST);
+    DL_TimerG_setTimerCount(LMotor_INST, 65535);//重置定时器计数值
+    DL_TimerG_startCounter(LMotor_INST);//启动定时器
     //使能中断
     NVIC_EnableIRQ(LMotor_INST_INT_IRQN);
-    NVIC_EnableIRQ(RMotor_INST_INT_IRQN);
-    NVIC_EnableIRQ(Encoder_GPIOA_INT_IRQN);
     NVIC_EnableIRQ(Encoder_GPIOB_INT_IRQN);
-
-    while (LgCapDone == false || RgCapDone == false) //等待中断
+    //等待测量
+    while (LD == false && Ltimeout == false)
     {
-        __WFI();
+        __WFE();
     }
-    
-
-    //计算
-    Lmotor_period = LgCapVal1 - LgCapVal2;
-    Rmotor_period = RgCapVal1 - RgCapVal2;
-    Lmotor_RPM = (1.0/PPR)/(Lmotor_period/Timerf);
-    Rmotor_RPM = (1.0/PPR)/(Rmotor_period/Timerf);
-
+    //失能中断
+    NVIC_DisableIRQ(Encoder_GPIOB_INT_IRQN);
+    NVIC_DisableIRQ(LMotor_INST_INT_IRQN);
+    if(Ltimeout == true) //若超时
+    {
+        return (Timerf * 60.0) / ((LFCap - LSCap)*PPR);
+    }
+    else
+    {
+        return (Timerf * 60.0) / ((LFCap - LSCap)*PPR);
+    }
 }
 
 
-//中断函数
-
-void GROUP1_IRQHandler()  //gpio中断
+//GPIO中断函数
+void GROUP1_IRQHandler(void)
 {
-    switch (DL_Interrupt_getPendingGroup(DL_INTERRUPT_GROUP_1))
+    switch(DL_Interrupt_getPendingGroup(DL_INTERRUPT_GROUP_1))
     {
-        case Encoder_GPIOA_INT_IIDX: //若为右电机中断
-            if(RgFirstEdge == false) //首次捕获边沿
+        case DL_INTERRUPT_GROUP1_IIDX_GPIOB: //左电机中断
+        {
+            DL_UART_transmitData(UART0, 'L');
+            if(LF == false)  //第一次中断
             {
-                RgCapVal1 = DL_TimerG_getTimerCount(RMotor_INST);
-                DL_GPIO_clearInterruptStatus(GPIOA, 17);
-                RgFirstEdge = true;
-                break;
+                LFCap = DL_TimerG_getTimerCount(LMotor_INST);  //读取当前计数值
+                DL_GPIO_clearInterruptStatus(Encoder_L_encoder_PORT, Encoder_L_encoder_PIN);
+                LF = true;
             }
-            else                     //第二次捕获边沿
+            else   //第二次中断
             {
-                RgCapVal2 = DL_TimerG_getTimerCount(RMotor_INST);
-                NVIC_DisableIRQ(Encoder_GPIOA_INT_IRQN);
-                NVIC_DisableIRQ(RMotor_INST_INT_IRQN);
-                DL_TimerG_stopCounter(RMotor_INST);
-                DL_GPIO_clearInterruptStatus(GPIOA, 17);
-                RgCapDone = true;
-                break;
+                LSCap = DL_TimerG_getTimerCount(LMotor_INST);  //读取当前计数值
+                DL_GPIO_clearInterruptStatus(Encoder_L_encoder_PORT, Encoder_L_encoder_PIN);
+                LD = true;
             }
-        case Encoder_GPIOB_INT_IIDX: //若为左电机中断
-            if(LgFirstEdge == false) //首次捕获边沿
-            {
-                LgCapVal1 = DL_TimerG_getTimerCount(LMotor_INST);
-                DL_GPIO_clearInterruptStatus(GPIOB, 8);
-                LgFirstEdge = true;
-                break;
-            }
-            else                     //第二次捕获边沿
-            {
-                LgCapVal2 = DL_TimerG_getTimerCount(LMotor_INST);
-                NVIC_DisableIRQ(Encoder_GPIOB_INT_IRQN);
-                NVIC_DisableIRQ(LMotor_INST_INT_IRQN);
-                DL_TimerG_stopCounter(LMotor_INST);
-                DL_GPIO_clearInterruptStatus(GPIOB, 8);
-                LgCapDone = true;
-                break;
-            }
+            break;
+        }
+        case DL_INTERRUPT_GROUP1_IIDX_GPIOA:
+            DL_UART_transmitData(UART0, 'R');
+            break;
         default:
             break;
     }
 }
 
-//定时器溢出中断，视为电机转速过低，将周期设为最大值
+//定时器中断函数
 void LMotor_INST_IRQHandler(void)
 {
-    LgCapDone = true;
-    Lmotor_period = 4294967295;
-    DL_TimerG_clearInterruptStatus(LMotor_INST, DL_TIMER_INTERRUPT_ZERO_EVENT);
+    switch(DL_TimerG_getPendingInterrupt(LMotor_INST))
+    {
+        case DL_TIMER_IIDX_ZERO://超时
+        {
+            Ltimeout = true;
+            DL_TimerG_clearInterruptStatus(LMotor_INST, DL_TIMER_IIDX_ZERO);
+            break;
+        }
+        default:
+            break;
+    }
 }
-void RMotor_INST_IRQHandler(void)
-{
-    RgCapDone = true;
-    Rmotor_period = 4294967295;
-    DL_TimerG_clearInterruptStatus(RMotor_INST, DL_TIMER_INTERRUPT_ZERO_EVENT);
-}
+

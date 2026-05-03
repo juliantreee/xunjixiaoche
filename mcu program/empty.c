@@ -29,30 +29,50 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include <stdio.h>
+
 #include "ti_msp_dl_config.h"
 #include "Motor.h"
 #include "delay.h"
 #include "Graysensor.h"
 #include "encoder.h"
 #include "oled.h"
-
 #include <ti/driverlib/m0p/dl_interrupt.h>
+
+#include <stdio.h>
+#include <string.h>
+
+int fputc(int c, FILE* stream)
+{
+    DL_UART_Main_transmitDataBlocking(UART0, c);
+    return c;
+}
+
+int fputs(const char* restrict s, FILE* restrict stream)
+{
+    uint16_t i, len;
+    len = strlen(s);
+    for (i = 0; i < len; i++)
+    {
+        DL_UART_Main_transmitDataBlocking(UART0, s[i]);
+    }
+    return len;
+}
+
+int puts(const char* _ptr)
+{
+    int count = fputs(_ptr, stdout);
+    count += fputs("\n", stdout);
+    return count;
+}
+
+
 int main(void)
 {
     SYSCFG_DL_init();
-    delay_us(100);
     Encoder_Init();
-    delay_us(100);
-    OLED_Init();
-    OLED_ColorTurn(0);
-    OLED_Clear();
-    delay_us(100);
     while (1) 
     {
-        OLED_ShowString(0, 0,"HELLO WORLD", 16);
-        OLED_Refresh();
-        delay_ms(500);
-        
+        printf("leftMotor speed: %.2f RPM",get_l_speed());
+        delay_ms(300);
     }
 }

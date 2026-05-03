@@ -80,12 +80,10 @@ void Motor_pid_step(void)
 {
     if(lrun == true)
     {
-        get_period();
-        pid_step(Lmotor_pid, Lmotor_RPM, LRPM);
+        //pid_step
     }
     if(rrun == true)
     {
-        get_period();
-        pid_step(Rmotor_pid, Rmotor_RPM, RRPM);
+        //pid_step
     }
 }

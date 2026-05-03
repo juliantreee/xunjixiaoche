@@ -84,8 +84,9 @@ GPIO7.associatedPins[0].direction           = "INPUT";
 GPIO7.associatedPins[0].assignedPort        = "PORTB";
 GPIO7.associatedPins[0].assignedPin         = "8";
 GPIO7.associatedPins[0].assignedPortSegment = "Lower";
-GPIO7.associatedPins[0].polarity            = "RISE_FALL";
 GPIO7.associatedPins[0].interruptEn         = true;
+GPIO7.associatedPins[0].internalResistor    = "PULL_DOWN";
+GPIO7.associatedPins[0].polarity            = "RISE";
 GPIO7.associatedPins[0].pin.$assign         = "PB8";
 GPIO7.associatedPins[1].$name               = "R_encoder";
 GPIO7.associatedPins[1].direction           = "INPUT";
@@ -93,7 +94,8 @@ GPIO7.associatedPins[1].assignedPort        = "PORTA";
 GPIO7.associatedPins[1].assignedPortSegment = "Upper";
 GPIO7.associatedPins[1].assignedPin         = "17";
 GPIO7.associatedPins[1].interruptEn         = true;
-GPIO7.associatedPins[1].polarity            = "RISE_FALL";
+GPIO7.associatedPins[1].internalResistor    = "PULL_DOWN";
+GPIO7.associatedPins[1].polarity            = "RISE";
 
 I2C1.$name                             = "I2C_OLED";
 I2C1.basicEnableController             = true;
@@ -137,15 +139,13 @@ PWM1.ccp1PinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric1";
 SYSCTL.forceDefaultClkConfig = true;
 
 TIMER1.interrupts         = ["ZERO"];
-TIMER1.timerMode          = "PERIODIC";
 TIMER1.$name              = "LMotor";
-TIMER1.timerClkDiv        = 4;
+TIMER1.timerMode          = "PERIODIC";
 TIMER1.peripheral.$assign = "TIMG7";
 
-TIMER2.timerMode          = "PERIODIC";
 TIMER2.interrupts         = ["ZERO"];
 TIMER2.$name              = "RMotor";
-TIMER2.timerClkDiv        = 4;
+TIMER2.timerMode          = "PERIODIC";
 TIMER2.peripheral.$assign = "TIMG6";
 
 UART1.$name             = "UART_0";
