@@ -24,7 +24,6 @@ const PWM1   = PWM.addInstance();
 const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
 const TIMER  = scripting.addModule("/ti/driverlib/TIMER", {}, false);
 const TIMER1 = TIMER.addInstance();
-const TIMER2 = TIMER.addInstance();
 const UART   = scripting.addModule("/ti/driverlib/UART", {}, false);
 const UART1  = UART.addInstance();
 
@@ -78,7 +77,6 @@ GPIO6.associatedPins[0].assignedPin      = "26";
 GPIO6.associatedPins[0].internalResistor = "PULL_DOWN";
 
 GPIO7.$name                                 = "Encoder";
-GPIO7.associatedPins.create(2);
 GPIO7.associatedPins[0].$name               = "L_encoder";
 GPIO7.associatedPins[0].direction           = "INPUT";
 GPIO7.associatedPins[0].assignedPort        = "PORTB";
@@ -88,14 +86,6 @@ GPIO7.associatedPins[0].interruptEn         = true;
 GPIO7.associatedPins[0].internalResistor    = "PULL_DOWN";
 GPIO7.associatedPins[0].polarity            = "RISE";
 GPIO7.associatedPins[0].pin.$assign         = "PB8";
-GPIO7.associatedPins[1].$name               = "R_encoder";
-GPIO7.associatedPins[1].direction           = "INPUT";
-GPIO7.associatedPins[1].assignedPort        = "PORTA";
-GPIO7.associatedPins[1].assignedPortSegment = "Upper";
-GPIO7.associatedPins[1].assignedPin         = "17";
-GPIO7.associatedPins[1].interruptEn         = true;
-GPIO7.associatedPins[1].internalResistor    = "PULL_DOWN";
-GPIO7.associatedPins[1].polarity            = "RISE";
 
 I2C1.$name                             = "I2C_OLED";
 I2C1.basicEnableController             = true;
@@ -143,11 +133,6 @@ TIMER1.$name              = "LMotor";
 TIMER1.timerMode          = "PERIODIC";
 TIMER1.peripheral.$assign = "TIMG7";
 
-TIMER2.interrupts         = ["ZERO"];
-TIMER2.$name              = "RMotor";
-TIMER2.timerMode          = "PERIODIC";
-TIMER2.peripheral.$assign = "TIMG6";
-
 UART1.$name             = "UART_0";
 UART1.targetBaudRate    = 115200;
 UART1.txPinConfig.$name = "ti_driverlib_gpio_GPIOPinGeneric2";
@@ -163,7 +148,6 @@ Board.peripheral.swclkPin.$suggestSolution   = "PA20";
 Board.peripheral.swdioPin.$suggestSolution   = "PA19";
 GPIO5.associatedPins[0].pin.$suggestSolution = "PB23";
 GPIO6.associatedPins[0].pin.$suggestSolution = "PB26";
-GPIO7.associatedPins[1].pin.$suggestSolution = "PA17";
 SYSCTL.peripheral.$suggestSolution           = "SYSCTL";
 UART1.peripheral.$suggestSolution            = "UART0";
 UART1.peripheral.rxPin.$suggestSolution      = "PA11";

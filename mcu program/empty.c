@@ -49,15 +49,14 @@ int main(void)
     SYSCFG_DL_init();
     Encoder_Init();
     Set_CurrentUART(0);
-    MotorL_speed(50);
-    MotorR_speed(0);
+    MotorL_speed(8);
     Go_forward();
     while (1) 
     {
+        MotorL_speed(50);
         printf("LeftMotor speed: %.2f RPM.\r\n",get_l_speed());
         printf("LFCap: %.f  ",(double)LFCap);
         printf("LSCap: %.f  ",(double)LSCap);
-        printf("LPeriod: %.f" ,(double)Lperiod);
         delay_ms(500);
     }
 }
