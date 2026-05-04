@@ -9,7 +9,8 @@
 volatile int LF;
 volatile bool LD,Ltimeout;
 volatile uint16_t LFCap,LSCap;
-
+volatile uint16_t RFCap=0;
+volatile uint16_t RSCap=0;
 void Encoder_Init(void)
 {
     LF = 0;
@@ -87,6 +88,7 @@ void GROUP1_IRQHandler(void)
             if(LF == 0)  //第一次中断
             {
                 LFCap = DL_TimerG_getTimerCount(LMotor_INST);  //读取当前计数值
+                //RFCap =Encoder_QEI_GetPosition;//
                 DL_GPIO_clearInterruptStatus(Encoder_PORT, Encoder_L_encoder_PIN);
                 LF+=1;
             }
@@ -97,6 +99,7 @@ void GROUP1_IRQHandler(void)
             else   //第十一次中断
             {
                 LSCap = DL_TimerG_getTimerCount(LMotor_INST);  //读取当前计数值
+                //RSCap =Encoder_QEI_GetPosition;
                 DL_GPIO_clearInterruptStatus(Encoder_PORT, Encoder_L_encoder_PIN);
                 LD = true;
             }
@@ -122,3 +125,23 @@ void LMotor_INST_IRQHandler(void)
             break;
     }
 }
+
+void Encoder_QEI_Init(void)
+{
+    // 清除可能的神奇残留
+    DL_TimerG_reset(QEI_INST);
+    // 启动 QEI 计数
+    DL_TimerG_startCounter(QEI_INST);
+}
+
+int32_t Encoder_QEI_GetPosition(void)
+{
+    // 直接读取硬件计数器的值
+    return (int32_t)DL_TimerG_getTimerCount(QEI_INST);
+}
+
+void Encoder_QEI_ResetPosition(void)
+{
+    DL_TimerG_setTimerCount(QEI_INST, 0);
+}
+
