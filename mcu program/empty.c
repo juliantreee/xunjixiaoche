@@ -36,6 +36,7 @@
 #include "Graysensor.h"
 #include "encoder.h"
 #include "oled.h"
+#include "Motor_pid.h"
 #include <ti/driverlib/m0p/dl_interrupt.h>
 
 #include <stdio.h>
@@ -49,14 +50,11 @@ int main(void)
     SYSCFG_DL_init();
     Encoder_Init();
     Set_CurrentUART(0);
-    MotorL_speed(8);
-    Go_forward();
+    Motor_pid_Init();
+    Lmotor_run(700);
     while (1) 
     {
-        MotorL_speed(50);
-        printf("LeftMotor speed: %.2f RPM.\r\n",get_l_speed());
-        printf("LFCap: %.f  ",(double)LFCap);
-        printf("LSCap: %.f  ",(double)LSCap);
-        delay_ms(500);
+        Motor_pid_step();
+        delay_ms(5);
     }
 }

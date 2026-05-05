@@ -33,7 +33,7 @@ void Encoder_Init(void)
     DL_TimerG_startCounter(LMotor_INST);
 }
 
-double get_l_speed(void)
+double get_speed(void)
 {
     //重置状态标识
     LF = 0;
@@ -55,7 +55,7 @@ double get_l_speed(void)
     //等待测量
     while (LD == false && Ltimeout == false)
     {
-        __WFE();
+        __WFI();
     }
     //失能中断
     NVIC_DisableIRQ(Encoder_INT_IRQN);
@@ -75,6 +75,18 @@ double get_l_speed(void)
     {
         return 1920000.0/(LFCap -LSCap);
     }
+}
+
+double get_l_speed()
+{
+    DL_GPIO_clearPins(Motorspeed_select_PORT, Motorspeed_select_PIN_0_PIN);
+    return get_speed();
+}
+
+double get_r_speed()
+{
+    DL_GPIO_setPins(Motorspeed_select_PORT, Motorspeed_select_PIN_0_PIN);
+    return get_speed();
 }
 
 
@@ -125,23 +137,3 @@ void LMotor_INST_IRQHandler(void)
             break;
     }
 }
-
-void Encoder_QEI_Init(void)
-{
-    // 清除可能的神奇残留
-    DL_TimerG_reset(QEI_INST);
-    // 启动 QEI 计数
-    DL_TimerG_startCounter(QEI_INST);
-}
-
-int32_t Encoder_QEI_GetPosition(void)
-{
-    // 直接读取硬件计数器的值
-    return (int32_t)DL_TimerG_getTimerCount(QEI_INST);
-}
-
-void Encoder_QEI_ResetPosition(void)
-{
-    DL_TimerG_setTimerCount(QEI_INST, 0);
-}
-

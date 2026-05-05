@@ -43,6 +43,13 @@ PID* pid_create(double kp, double ki, double kd, double Ctlmax, double Ctlmin,do
     return p;
 }
 
+void pid_clear(PID *in) //重置
+{
+    in->lastValue = 0.0;
+    in->ierror = 0.0;
+    in->first = true;
+}
+
 double pid_step(PID *in,double value,double target)  //传入当前值和目标值,返回控制值
 {
     if(in->first == true)
