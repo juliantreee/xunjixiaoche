@@ -38,13 +38,13 @@
 #include "oled.h"
 #include "Motor_pid.h"
 #include <ti/driverlib/m0p/dl_interrupt.h>
-
+#include "menu.h"
 #include <stdio.h>
 #include <string.h>
 #include "uart.h"
 
 
-
+ int flag=1;
 int main(void)
 {
     SYSCFG_DL_init();
@@ -52,15 +52,50 @@ int main(void)
     Set_CurrentUART(0);
     Motor_pid_Init();
     Lmotor_run(700);
+
+    SYSCFG_DL_I2C_OLED_init();
+    OLED_Init;
+    delay_ms(10);
+    OLED_DisPlay_On;
+    OLED_Clear();
+    OLED_ShowString(0, 0, "THE 1 TEST", 16);
+    OLED_ShowString(0, 16, "THE 2 TEST", 16);
+    OLED_ShowString(0, 32, "THE 3 TEST", 16);
+    OLED_ShowString(0, 48, "THE 4 TEST", 16);
+    uint8_t keynum =0;
     while (1) 
-    {
-        // 位置环控制（计算目标速度）
-        Line_Tracking_Step();
-        
-        // 速度环控制（PID控制电机转速）
-        Motor_pid_step();
-        
-        // 控制周期延时
-        delay_ms(10);  // 100Hz控制频率
+    {//key1按下时切换菜单从1-4,key2按下时进入菜单,没按下是0
+        keynum = getnum;
+        if(keynum =1)
+        {
+            flag++;
+            flag=flag%5;
+        }
+        else if(keynum =2)
+        {
+            //进入下一层菜单的设置
+        }
+        switch (flag)
+        {
+            case 1:
+            {
+                break;
+            }
+            case 2:
+            {
+
+                break;
+            }
+            case 3:
+            {
+
+                break;
+            }
+            case 4:
+            {
+
+               break;
+            }
+        }
     }
 }

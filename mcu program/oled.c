@@ -319,3 +319,34 @@ void OLED_Init(void)
 	OLED_WR_Byte(0xAF,OLED_CMD);
 	OLED_Clear();
 }
+void OLED_DrawRectangel(u8 x1,u8 y1,u8 ,u8 x2,u8 y2,u8 x3,u8 y3 ,u8 x4 ,u8 y4 ,u8 fill)//四个坐标从左上开始,顺时针,最后一个表示是否填充
+{
+	OLED_DrawLine(x1,y1,x2,y2);
+	OLED_DrawLine(x2,y2,x3,y3);
+	OLED_DrawLine(x3,y3,x4,y4);
+	OLED_DrawLine(x1,y1,x4,y4);
+	//这个填充只能矩形使用谨慎一点
+	if(fill == 0)
+	{
+		for(u8 i=0,i<(x2-x1),i++)//X坐标差
+		{
+			for(u8 j=0,j<(y2-y3),j++)//Y坐标差
+			{
+				OLED_DrawPoint(x1+i,x1+j);
+			}
+		}
+	}
+	
+}
+void OLED_ClearRectangel(u8 x1,u8 y1,u8 ,u8 x2,u8 y2,u8 x3,u8 y3 ,u8 x4 ,u8 y4 )//四个坐标从左上开始,顺时针,最后一个表示是否填充
+{
+	for(u8 i=0,i<(x2-x1),i++)//X坐标差
+	{
+		{
+			for(u8 j=0,j<(y2-y3),j++)//Y坐标差
+			{
+				OLED_ClearPoint(x1+i,x1+j);
+			}
+		}
+	}
+}
