@@ -54,7 +54,13 @@ int main(void)
     Lmotor_run(700);
     while (1) 
     {
+        // 位置环控制（计算目标速度）
+        Line_Tracking_Step();
+        
+        // 速度环控制（PID控制电机转速）
         Motor_pid_step();
-        delay_ms(5);
+        
+        // 控制周期延时
+        delay_ms(10);  // 100Hz控制频率
     }
 }
