@@ -65,7 +65,7 @@ int main(void)
     uint8_t keynum =0;
     while (1) 
     {//key1按下时切换菜单从1-4,key2按下时进入菜单,没按下是0
-        keynum = getnum;
+        keynum = getnum();
         if(keynum =1)
         {
             flag++;

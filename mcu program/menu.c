@@ -19,7 +19,7 @@ int getnum() {
     const uint8_t DEBOUNCE_THRESH = 5;  // 5次采样（假设1ms扫描周期）
 
     // 检测 KEY1
-    if (DL_GPIO_readPins(KEY1_PORT, KEY1_PIN_21_PIN) > 0) {  // 低电平有效
+    if (DL_GPIO_readPins(KEY1_PORT, KEY1_PIN_23_PIN) > 0) {  // 低电平有效
         if (key1_state == KEY1_IDLE) {
             key1_state = KEY1_PRESSED;
         } else if (key1_state == KEY1_PRESSED) {
@@ -34,7 +34,7 @@ int getnum() {
     }
 
     // 检测 KEY2（逻辑类似）
-    if (DL_GPIO_readPins(KEY2_PORT, KEY2_PIN_18_PIN) > 0) {
+    if (DL_GPIO_readPins(KEY2_PORT, KEY2_PIN_26_PIN) > 0) {
         if (key2_state == KEY2_IDLE) {
             key2_state = KEY2_PRESSED;
         } else if (key2_state == KEY2_PRESSED) {
