@@ -39,6 +39,7 @@
 #include "Motor_pid.h"
 #include <ti/driverlib/m0p/dl_interrupt.h>
 
+#include "menu.h"
 #include <stdio.h>
 #include <string.h>
 #include "uart.h"
@@ -56,12 +57,12 @@ int main(void)
     while (1) 
     {//key1按下时切换菜单从1-4,key2按下时进入菜单,没按下是0
         keynum = getnum();
-        if(keynum =1)
+        if(keynum ==1)
         {
             flag++;
             flag=flag%5;
         }
-        else if(keynum =2)
+        else if(keynum ==2)
         {
             //进入下一层菜单的设置
         }

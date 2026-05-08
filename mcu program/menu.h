@@ -4,5 +4,5 @@
 
 #ifndef MCU_PROGRAM_MENU_H
 #define MCU_PROGRAM_MENU_H
-
+int getnum();
 #endif //MCU_PROGRAM_MENU_H
