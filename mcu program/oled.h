@@ -326,5 +326,9 @@ void OLED_ShowPicture(u8 x0,u8 y0,u8 x1,u8 y1,u8 BMP[]);
  */
 void OLED_Init(void);
 
+void OLED_ClearRectangel(u8 x1,u8 y1,u8 x2,u8 y2,u8 x3,u8 y3 ,u8 x4 ,u8 y4 );//四个坐标从左上开始,顺时针,最后一个表示是否填充
+
+void OLED_DrawRectangel(u8 x1,u8 y1 ,u8 x2,u8 y2,u8 x3,u8 y3 ,u8 x4 ,u8 y4 ,u8 fill);//四个坐标从左上开始,顺时针,最后一个表示是否填充
+void OLED_AreaInvert(u8 x1, u8 y1, u8 x2, u8 y2);//反色一片区域
 
 #endif
