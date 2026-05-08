@@ -42,6 +42,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "uart.h"
+#include "track.h"
 
 
 
@@ -50,11 +51,13 @@ int main(void)
     SYSCFG_DL_init();
     Encoder_Init();
     Set_CurrentUART(0);
-    Motor_pid_Init();
-    Lmotor_run(700);
+    track_Init();
+    to_next_cross(100);
+    to_next_cross(100);
+    to_next_cross(100);
+    to_next_cross(100);
     while (1) 
     {
-        Motor_pid_step();
-        delay_ms(5);
+
     }
 }
