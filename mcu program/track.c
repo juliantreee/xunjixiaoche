@@ -3,57 +3,61 @@
 #include "Graysensor.h"
 #include "track.h"
 #include "delay.h"
+#include <stdio.h>
 
 PID *track;
 
-double stop_distance = 0.59; //识别到路口后继续开的距离，单位为圈数
+double stop_distance = 0.53; //识别到路口后继续开的距离，单位为圈数
 
 void track_Init(void)
 {
     Motor_pid_Init();
+    track = pid_create(5.0,1.0,0.0,100,-100,0.005);
 }
 
 signed char track_err(void)
 {
     Gray_read_all();
-    if(gray_value[3] == true)
+    switch(gray_value)
     {
-        if(gray_value[4] == true)
+        case 0x18:
         {
             return 0;
+            break;
         }
-        else if(gray_value[2] == true)
-        {
-            return 3;
-        }
-        else
+        case 0x08:
         {
             return 1;
+            break;
         }
-    }
-    else
-    {
-        if(gray_value[4] == true)
+        case 0x10:
         {
-            if(gray_value[5] == true)
-            {
-                return -3;
-            }
-            else
-            {
-                return -1;
-            }
+            return -1;
+            break;
         }
-        else
+        case 0x0C:
         {
-            if(gray_value[5] == true)
-            {
-                return -4;
-            }
-            else
-            {
-                return 4;
-            }
+            return 3;
+            break;
+        }
+        case 0x30:
+        {
+            return -3;
+            break;
+        }
+        case 0x04:
+        {
+            return 4;
+            break;
+        }
+        case 0x20:
+        {
+            return -4;
+            break;
+        }
+        default: //其他情况
+        {
+            return 100;
         }
     }
 }
@@ -61,12 +65,12 @@ signed char track_err(void)
 void to_next_cross(double speed)
 {
     pid_clear(track);
-    Gray_read_all();
     while(1)
     {
-        if(gray_value[0] == true)
+        signed char err = track_err();
+        if(((gray_value >> 0) & 1) == 1)
         {
-            if(gray_value[7] == true) //十字路口
+            if(((gray_value >> 7) & 1) == 1) //十字路口
             {
                 Lmotor_run(speed);
                 Rmotor_run(speed);
@@ -77,7 +81,7 @@ void to_next_cross(double speed)
                 }
                 Lmotor_brake();
                 Rmotor_brake();
-                break;
+                return;
             }
             else //左路口
             {
@@ -90,26 +94,21 @@ void to_next_cross(double speed)
                 }
                 Lmotor_brake();
                 Rmotor_brake();
+                delay_ms(300);
                 Lmotor_run(-100);
                 Rmotor_run(100);
-                while(gray_value[0] == false) //转向
+                for(int j=0; j <= 61; j++) //转向
                 {
                     Motor_pid_step();
-                    Gray_read_all();
-                    delay_ms(5);
-                }
-                while(gray_value[4] == false) //转向
-                {
-                    Motor_pid_step();
-                    Gray_read_all();
                     delay_ms(5);
                 }
                 Lmotor_brake();
                 Rmotor_brake();
-                break;
+                delay_ms(500);
+                return;
             }
         }
-        else if(gray_value[7] == true) //右路口
+        else if(((gray_value >> 7) & 1) == 1) //右路口
         {
             Lmotor_run(speed);
             Rmotor_run(speed);
@@ -120,26 +119,26 @@ void to_next_cross(double speed)
             }
             Lmotor_brake();
             Rmotor_brake();
+            delay_ms(300);
             Lmotor_run(100);
             Rmotor_run(-100);
-            for(int j=0; j <= 63; j++) //转向
+            for(int j=0; j <= 61; j++)
             {
                 Motor_pid_step();
-                Gray_read_all();
                 delay_ms(5);
             }
             Lmotor_brake();
             Rmotor_brake();
-            break;
+            delay_ms(500);
+            return;
         }
         else //循线
         {
-            Gray_read_all();
-            double err = track_err();
-            Lmotor_run(speed - err * 5);
-            Rmotor_run(speed + err * 5);
+            double ctl = pid_step(track, (double)err, 0);
+            Lmotor_run(speed + ctl);
+            Rmotor_run(speed - ctl);
             Motor_pid_step();
             delay_ms(5);
-        }
+        }        
     }
 }

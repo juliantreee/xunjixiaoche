@@ -2,7 +2,7 @@
 #include "delay.h"
 #include "Graysensor.h"
 #include "Motor.h"
-bool gray_value[8] = {0,0,0,0,0,0,0,0};
+uint8_t gray_value = 0x00;
 
 void select_channel(uint8_t channel)
 {
@@ -50,7 +50,13 @@ void Gray_read_all()
     {
         select_channel(i);
         delay_us(50);
-        gray_value[i] = Gray_read();
-    }
-    
+        if(Gray_read() == true)
+        {
+            gray_value |= (1u << i); //将gray_value的第i位置1
+        }
+        else
+        {
+            gray_value &= ~(1u << i);//将gray_value的第i位置0
+        }
+    } 
 }
