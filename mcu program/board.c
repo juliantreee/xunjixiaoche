@@ -2,10 +2,15 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "board.h"
+#include "delay.h"
 #include "ti/driverlib/m0p/dl_core.h"
+#include "ti/driverlib/dl_dma.h"
 
 volatile unsigned int delay_times = 0;
 volatile unsigned char uart_data = 0;
+
+/* DMA 接收缓冲区 — 陀螺仪 11 字节帧 */
+volatile uint8_t gyro_dma_buf[11];
 
 /*============================================================================
  * 六轴传感器数据全局变量定义
@@ -27,17 +32,15 @@ void board_init(void)
 {
 	// SYSCFG初始化
 	SYSCFG_DL_init();
-	//清除串口中断标志
-	NVIC_ClearPendingIRQ(UART_0_INST_INT_IRQN);
-	//使能串口中断
-	NVIC_EnableIRQ(UART_0_INST_INT_IRQN);
-	
-	//清除串口中断标志
+
+	// 配置 DMA CH2 接收陀螺仪数据 → gyro_dma_buf
+	DL_DMA_setDestAddr(DMA, DMA_CH2_CHAN_ID, (uint32_t)&gyro_dma_buf[0]);
+	DL_DMA_setTransferSize(DMA, DMA_CH2_CHAN_ID, 11);
+	DL_DMA_enableChannel(DMA, DMA_CH2_CHAN_ID);
+
+	// 使能 printf 调试串口中断
 	NVIC_ClearPendingIRQ(UART_1_INST_INT_IRQN);
-	//使能串口中断
 	NVIC_EnableIRQ(UART_1_INST_INT_IRQN);
-	
-	
 }
 
 //串口发送单个字符
@@ -275,20 +278,21 @@ void CopeSerial2Data(unsigned char ucData)
     ucRxCnt = 0;
 }
 
-//串口的中断服务函数
-void UART_0_INST_IRQHandler(void)
+// DMA 中断服务函数 — 陀螺仪 11 字节帧接收
+void DMA_IRQHandler(void)
 {
-    //如果产生了串口中断
-    switch( DL_UART_getPendingInterrupt(UART_0_INST) )
+    switch (DL_DMA_getPendingInterrupt(DMA))
     {
-        case DL_UART_IIDX_RX://如果是接收中断
-						// 接收发送过来的数据
-            uart_data = DL_UART_Main_receiveData(UART_0_INST);
-            // 调用数据解析函数
-            CopeSerial2Data(uart_data);
+        case DL_DMA_INTERRUPT_CHANNEL2:  // 陀螺仪 RX 通道
+            // 逐字节送入解析器（与原来中断方式一致）
+            for (int i = 0; i < 11; i++)
+            {
+                CopeSerial2Data(gyro_dma_buf[i]);
+            }
+            DL_DMA_clearInterruptStatus(DMA, DL_DMA_INTERRUPT_CHANNEL2);
             break;
 
-        default://其他的串口中断
+        default:
             break;
     }
 }

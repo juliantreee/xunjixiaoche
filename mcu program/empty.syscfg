@@ -142,10 +142,19 @@ TIMER1.timerMode          = "PERIODIC";
 TIMER1.interruptPriority  = "1";
 TIMER1.peripheral.$assign = "TIMG7";
 
-UART1.$name             = "UART_0";
-UART1.targetBaudRate    = 336000;
-UART1.txPinConfig.$name = "ti_driverlib_gpio_GPIOPinGeneric2";
-UART1.rxPinConfig.$name = "ti_driverlib_gpio_GPIOPinGeneric3";
+UART1.$name                             = "UART_0";
+UART1.targetBaudRate                    = 336000;
+UART1.enableFIFO                        = true;
+UART1.rxFifoThreshold                   = "DL_UART_RX_FIFO_LEVEL_ONE_ENTRY";
+UART1.enabledDMARXTriggers              = "DL_UART_DMA_INTERRUPT_RX";
+UART1.txPinConfig.$name                 = "ti_driverlib_gpio_GPIOPinGeneric2";
+UART1.rxPinConfig.$name                 = "ti_driverlib_gpio_GPIOPinGeneric3";
+UART1.DMA_CHANNEL_RX.$name              = "DMA_CH2";
+UART1.DMA_CHANNEL_RX.srcLength          = "LONG";
+UART1.DMA_CHANNEL_RX.dstLength          = "LONG";
+UART1.DMA_CHANNEL_RX.transferMode       = "FULL_CH_REPEAT_BLOCK";
+UART1.DMA_CHANNEL_RX.enableInterrupt    = true;
+UART1.DMA_CHANNEL_RX.peripheral.$assign = "DMA_CH2";
 
 UART2.$name                             = "UART_1";
 UART2.targetBaudRate                    = 115200;
