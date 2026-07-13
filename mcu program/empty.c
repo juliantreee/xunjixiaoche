@@ -43,12 +43,13 @@
     #include <string.h>
     #include "uart.h"
     #include "track.h"
+    #include "board.h"
 
 
 
     int main(void)
     {
-        SYSCFG_DL_init();
+        board_init();
         Encoder_Init();
         Set_CurrentUART(0);
         track_Init();
