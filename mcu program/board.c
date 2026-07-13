@@ -37,15 +37,6 @@ void board_init(void)
 	//使能串口中断
 	NVIC_EnableIRQ(UART_1_INST_INT_IRQN);
 	
-	//清除定时器中断标志
-  NVIC_ClearPendingIRQ(Motor_INST_INT_IRQN);
-  //使能定时器中断
-  NVIC_EnableIRQ(Motor_INST_INT_IRQN);
-	
-	//清除定时器中断标志
-  NVIC_ClearPendingIRQ(LMotor_INST_INT_IRQN);
-  //使能定时器中断
-  NVIC_EnableIRQ(LMotor_INST_INT_IRQN);
 	
 }
 
