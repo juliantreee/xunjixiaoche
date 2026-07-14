@@ -32,3 +32,23 @@
 - `uart.c/h` — 旧 printf 模块，已废弃（fputc 移至 board.c）
 - `encoder.c` — 编码器测速，自行管理 LMotor(TIMG7) 中断
 - `Motor.c` — 电机控制，PWM 用 TIMG0
+- `INS.c/h` — 惯性导航模块
+
+## INS 惯性导航
+
+### 核心功能
+- `INS_Init()` / `INS_Update(dt_s)` — 初始化 + 周期更新（加速度积分 → 速度 → 位置）
+- 全局状态 `ins` (INS_State): x, y, vx, vy, yaw, dt
+- 重力补偿：用 Roll/Pitch 从机体加速度中减掉重力投影
+- 死区滤波 (0.05 m/s²) + 速度衰减 (0.999) 抑制漂移
+
+### 运动原语（阻塞式）
+- `INS_GoStraight(distance_m, speed_rpm)` — 走直线，含航向 PI 修正
+- `INS_GoArc(radius_m, angle_deg, speed_rpm)` — 走圆弧，半径正=左转，`radius=0`=原地旋转
+
+### 关键注意
+- 依赖 `Motor_pid.h`、`delay.h`、`<math.h>`（需 `-lm` 链接）
+- `WHEEL_TRACK` / `WHEEL_CIRCUMFERENCE` 宏需按实车标定
+- `board.h` 未声明的函数 (`AccelX/Y/Z`, `QuatQ0-3`) 在 INS.c 中 extern
+- Cortex-M0+ 无 FPU，所有 float 运算为软件模拟，注意更新频率
+- 圆弧: 差速公式 `VL/R = base*(R ± W/2)/R`，3倍限幅，累积 yaw 判断到达
