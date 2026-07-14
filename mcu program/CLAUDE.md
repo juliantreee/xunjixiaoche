@@ -32,6 +32,7 @@
 - `uart.c/h` — 旧 printf 模块，已废弃（fputc 移至 board.c）
 - `encoder.c` — 编码器测速，自行管理 LMotor(TIMG7) 中断
 - `Motor.c` — 电机控制，PWM 用 TIMG0
+- `menu.c/h` — OLED 菜单系统，两键操作（KEY1 翻项 / KEY2 确认）
 - `INS.c/h` — 惯性导航模块
 
 ## INS 惯性导航
@@ -52,3 +53,18 @@
 - `board.h` 未声明的函数 (`AccelX/Y/Z`, `QuatQ0-3`) 在 INS.c 中 extern
 - Cortex-M0+ 无 FPU，所有 float 运算为软件模拟，注意更新频率
 - 圆弧: 差速公式 `VL/R = base*(R ± W/2)/R`，3倍限幅，累积 yaw 判断到达
+
+## 代码规范
+
+- 抑制 unused parameter 警告用 `(void)x;`，不要用 `x = x;`
+- 未使用的变量/结构体成员直接删除，不保留死代码
+- 未实现的函数声明（头文件里的空声明）删掉
+
+## OLED 菜单
+
+- `menu.c/h` — 基于 0.96" OLED (128x64) 的两键菜单
+- `Menu_Init()` — 初始化并显示菜单
+- `Menu_Show()` — 重绘菜单（4 行 size=16，选中行 `>` + 反色高亮）
+- `Menu_Update()` — 轮询按键，返回 1~MENU_ITEMS 表示选中，0 表示无操作
+- KEY1 (PA23): 下翻，KEY2 (PA26): 确认
+- 菜单标签在 `menu_labels[]` 数组中

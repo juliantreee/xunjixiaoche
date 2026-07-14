@@ -113,7 +113,7 @@ FILE __stdout;
 //定义_sys_exit()以避免使用半主机模式
 void _sys_exit(int x)
 {
-	x = x;
+	(void)x;
 }
 #endif
 
@@ -128,7 +128,6 @@ void CopeSerial2Data(unsigned char ucData)
     static unsigned char ucRxBuffer[11];
     static unsigned char ucRxCnt = 0;
     unsigned char sum = 0;
-    int i;
 
     // 缓存数据
     ucRxBuffer[ucRxCnt++] = ucData;
@@ -467,6 +466,7 @@ void performCaliBias(void)
 //printf函数重定义
 int fputc(int ch, FILE *stream)
 {
+	(void)stream;
 	//当串口0忙的时候等待，不忙的时候再发送传进来的字符
 	while( DL_UART_isBusy(UART_1_INST) == true );
 	
