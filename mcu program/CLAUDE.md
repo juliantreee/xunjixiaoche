@@ -16,6 +16,14 @@
 - 陀螺仪 ISR: `UART_0_INST_IRQHandler` → `CopeSerial2Data()` 解析 0x5A 帧
 - printf: `board.c` 的 `fputc` → `UART_1_INST`
 - 校准命令 `sendCaliYawCommand` / `performCaliBias` 走 UART_0
+- 陀螺仪数据通过 4 个全局结构体输出: `stcGyro` / `stcAngle` / `stcAccel` / `stcQuat`，无返回值
+
+## 陀螺仪数据帧 (0x5A)
+
+- `CopeSerial2Data()` 逐字节接收，凑满 11 字节帧后校验，写入全局变量
+- 帧类型: `0xAA`=角速度, `0xBB`=角度, `0xCC`=加速度, `0xDD`=四元数
+- `uart0_send_SendByte(data, len)` 向陀螺仪发送指令 (UART_0_INST)
+- 预设指令数组: `Key[5]`, `Yaw_Zero[5]`, `Save[5]`, `BIAS_CAL[5]`
 
 ## SysConfig
 
@@ -27,13 +35,14 @@
 
 ## 关键文件
 
-- `empty.c` — main，调用 `board_init()`
+- `empty.c` — main，6 区模板循环（陀螺仪读取 / INS更新 / 循迹 / INS运动 / printf / 陀螺仪指令）
 - `board.c/h` — UART 收发、陀螺仪解析、printf 重定向
-- `uart.c/h` — 旧 printf 模块，已废弃（fputc 移至 board.c）
+- `uart.c/h` — 已废弃，`Set_CurrentUART()` 无效，不要 include
 - `encoder.c` — 编码器测速，自行管理 LMotor(TIMG7) 中断
 - `Motor.c` — 电机控制，PWM 用 TIMG0
 - `menu.c/h` — OLED 菜单系统，两键操作（KEY1 翻项 / KEY2 确认）
 - `INS.c/h` — 惯性导航模块
+- `track.c/h` — 灰度循迹，`to_next_cross()` / `track_err()`
 
 ## INS 惯性导航
 
