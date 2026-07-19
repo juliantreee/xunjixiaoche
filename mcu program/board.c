@@ -4,13 +4,9 @@
 #include "board.h"
 #include "delay.h"
 #include "ti/driverlib/m0p/dl_core.h"
-#include "ti/driverlib/dl_dma.h"
 
 volatile unsigned int delay_times = 0;
 volatile unsigned char uart_data = 0;
-
-/* DMA 接收缓冲区 — 陀螺仪 11 字节帧 */
-volatile uint8_t gyro_dma_buf[11];
 
 /*============================================================================
  * 六轴传感器数据全局变量定义
@@ -30,36 +26,11 @@ struct SQuat stcQuat = {0};
 
 void board_init(void)
 {
-	// SYSCFG初始化
 	SYSCFG_DL_init();
-
-	// 配置 DMA CH2 接收陀螺仪数据 → gyro_dma_buf
-	DL_DMA_setDestAddr(DMA, DMA_CH2_CHAN_ID, (uint32_t)&gyro_dma_buf[0]);
-	DL_DMA_setTransferSize(DMA, DMA_CH2_CHAN_ID, 11);
-	DL_DMA_enableChannel(DMA, DMA_CH2_CHAN_ID);
 
 	// 使能 printf 调试串口中断
 	NVIC_ClearPendingIRQ(UART_1_INST_INT_IRQN);
 	NVIC_EnableIRQ(UART_1_INST_INT_IRQN);
-}
-
-//串口发送单个字符
-void uart0_send_char(char ch)
-{
-    //当串口0忙的时候等待，不忙的时候再发送传进来的字符
-    while( DL_UART_isBusy(UART_0_INST) == true );
-    //发送单个字符
-    DL_UART_Main_transmitData(UART_0_INST, ch);
-}
-//串口发送字符串
-void uart0_send_string(char* str)
-{
-    //当前字符串地址不在结尾 并且 字符串首地址不为空
-    while(*str!=0&&str!=0)
-    {
-        //发送字符串首地址中的字符，并且在发送完成之后首地址自增
-        uart0_send_char(*str++);
-    }
 }
 
 //串口发送单个字符
@@ -81,14 +52,6 @@ void uart1_send_string(char* str)
     }
 }
 
-
-void uart0_send_SendByte(uint8_t* data, uint32_t len)
-{
-    for(uint32_t i = 0; i < len; i++)
-    {
-        uart0_send_char(data[i]);  // 直接发送原始字节
-    }
-}
 
 void uart1_send_SendByte(uint8_t* data, uint32_t len)
 {
@@ -118,183 +81,6 @@ void _sys_exit(int x)
 #endif
 
 
-
-/******************************************************************************
- * 数据解析函数：接收0x5A开头的数据帧
- * 支持：角速度(0xAA)、角度(0xBB)、加速度(0xCC)、四元数(0xDD)
- ******************************************************************************/
-void CopeSerial2Data(unsigned char ucData)
-{
-    static unsigned char ucRxBuffer[11];
-    static unsigned char ucRxCnt = 0;
-    unsigned char sum = 0;
-
-    // 缓存数据
-    ucRxBuffer[ucRxCnt++] = ucData;
-
-    // 帧头校验
-    if (ucRxBuffer[0] != 0x5A)
-    {
-        ucRxCnt = 0;
-        return;
-    }
-
-    // 帧类型判断，确定帧长度
-    // 加速度/角速度/角度帧: 11字节 (0x5A + TYPE + 4组数据 + SUM)
-    // 四元数帧: 11字节 (0x5A + TYPE + 4组数据 + SUM)
-    // 寄存器读报包: 11字节
-    if (ucRxCnt < 11) return;  // 等待完整帧
-
-    // 根据TYPE计算校验和
-    switch (ucRxBuffer[1])
-    {
-        case 0xAA:  // 角速度
-            sum = ucRxBuffer[0] + ucRxBuffer[1] +
-                  ucRxBuffer[2] + ucRxBuffer[3] +   // WxL, WxH
-                  ucRxBuffer[4] + ucRxBuffer[5] +   // WyL, WyH
-                  ucRxBuffer[6] + ucRxBuffer[7] +   // WzL, WzH
-                  ucRxBuffer[8] + ucRxBuffer[9];    // 0x00, 0x00
-            
-            if (sum != ucRxBuffer[10])
-            {
-                ucRxCnt = 0;
-                return;
-            }
-            
-            // 解析角速度
-            {
-                short wx = (short)((ucRxBuffer[3] << 8) | ucRxBuffer[2]);
-                short wy = (short)((ucRxBuffer[5] << 8) | ucRxBuffer[4]);
-                short wz = (short)((ucRxBuffer[7] << 8) | ucRxBuffer[6]);
-                
-                stcGyro.wx = (float)wx / 32768.0f * 2000.0f;  // °/s
-                stcGyro.wy = (float)wy / 32768.0f * 2000.0f;
-                stcGyro.wz = (float)wz / 32768.0f * 2000.0f;
-            }
-            break;
-            
-        case 0xBB:  // 角度
-            sum = ucRxBuffer[0] + ucRxBuffer[1] +
-                  ucRxBuffer[2] + ucRxBuffer[3] +   // RollL, RollH
-                  ucRxBuffer[4] + ucRxBuffer[5] +   // PitchL, PitchH
-                  ucRxBuffer[6] + ucRxBuffer[7] +   // YawL, YawH
-                  ucRxBuffer[8] + ucRxBuffer[9];    // 0x00, 0x00
-            
-            if (sum != ucRxBuffer[10])
-            {
-                ucRxCnt = 0;
-                return;
-            }
-            
-            // 解析角度
-            {
-                short roll  = (short)((ucRxBuffer[3] << 8) | ucRxBuffer[2]);
-                short pitch = (short)((ucRxBuffer[5] << 8) | ucRxBuffer[4]);
-                short yaw   = (short)((ucRxBuffer[7] << 8) | ucRxBuffer[6]);
-                
-                stcAngle.Roll  = (float)roll  / 32768.0f * 180.0f;  // °
-                stcAngle.Pitch = (float)pitch / 32768.0f * 180.0f;
-                stcAngle.Yaw   = (float)yaw   / 32768.0f * 180.0f;
-            }
-            break;
-            
-        case 0xCC:  // 加速度
-            sum = ucRxBuffer[0] + ucRxBuffer[1] +
-                  ucRxBuffer[2] + ucRxBuffer[3] +   // AxL, AxH
-                  ucRxBuffer[4] + ucRxBuffer[5] +   // AyL, AyH
-                  ucRxBuffer[6] + ucRxBuffer[7] +   // AzL, AzH
-                  ucRxBuffer[8] + ucRxBuffer[9];    // 0x00, 0x00
-            
-            if (sum != ucRxBuffer[10])
-            {
-                ucRxCnt = 0;
-                return;
-            }
-            
-            // 解析加速度
-            {
-                short ax = (short)((ucRxBuffer[3] << 8) | ucRxBuffer[2]);
-                short ay = (short)((ucRxBuffer[5] << 8) | ucRxBuffer[4]);
-                short az = (short)((ucRxBuffer[7] << 8) | ucRxBuffer[6]);
-                
-                const float G = 9.8f;  // 重力加速度
-                stcAccel.ax = (float)ax / 32768.0f * 16.0f * G;  // m/s²
-                stcAccel.ay = (float)ay / 32768.0f * 16.0f * G;
-                stcAccel.az = (float)az / 32768.0f * 16.0f * G;
-            }
-            break;
-            
-        case 0xDD:  // 四元数
-            sum = ucRxBuffer[0] + ucRxBuffer[1] +
-                  ucRxBuffer[2] + ucRxBuffer[3] +   // Q0L, Q0H
-                  ucRxBuffer[4] + ucRxBuffer[5] +   // Q1L, Q1H
-                  ucRxBuffer[6] + ucRxBuffer[7] +   // Q2L, Q2H
-                  ucRxBuffer[8] + ucRxBuffer[9];    // Q3L, Q3H
-            
-            if (sum != ucRxBuffer[10])
-            {
-                ucRxCnt = 0;
-                return;
-            }
-            
-            // 解析四元数
-            {
-                short q0 = (short)((ucRxBuffer[3] << 8) | ucRxBuffer[2]);
-                short q1 = (short)((ucRxBuffer[5] << 8) | ucRxBuffer[4]);
-                short q2 = (short)((ucRxBuffer[7] << 8) | ucRxBuffer[6]);
-                short q3 = (short)((ucRxBuffer[9] << 8) | ucRxBuffer[8]);
-                
-                stcQuat.q0 = (float)q0 / 32768.0f;
-                stcQuat.q1 = (float)q1 / 32768.0f;
-                stcQuat.q2 = (float)q2 / 32768.0f;
-                stcQuat.q3 = (float)q3 / 32768.0f;
-            }
-            break;
-            
-        case 0xEE:  // 寄存器读报包（可根据需要解析）
-            // 寄存器读报包的格式与上述类似，可按需处理
-            sum = ucRxBuffer[0] + ucRxBuffer[1] +
-                  ucRxBuffer[2] + ucRxBuffer[3] +
-                  ucRxBuffer[4] + ucRxBuffer[5] +
-                  ucRxBuffer[6] + ucRxBuffer[7] +
-                  ucRxBuffer[8] + ucRxBuffer[9];
-            
-            if (sum != ucRxBuffer[10])
-            {
-                ucRxCnt = 0;
-                return;
-            }
-            // 寄存器数据读取处理
-            break;
-            
-        default:
-            // 未知类型，复位
-            ucRxCnt = 0;
-            return;
-    }
-    
-    // 解析成功，复位接收计数器
-    ucRxCnt = 0;
-}
-
-// DMA 中断服务函数 — 陀螺仪 11 字节帧接收
-void DMA_IRQHandler(void)
-{
-    switch (DL_DMA_getPendingInterrupt(DMA))
-    {
-        case DL_DMA_INTERRUPT_CHANNEL2:  // 陀螺仪 RX 通道
-            // 逐字节送入解析器（与原来中断方式一致）
-            for (int i = 0; i < 11; i++)
-            {
-                CopeSerial2Data(gyro_dma_buf[i]);
-            }
-            DL_DMA_clearInterruptStatus(DMA, DL_DMA_INTERRUPT_CHANNEL2);
-            break;
-
-        default:
-            break;
-    }
-}
 
 //串口的中断服务函数
 void UART_1_INST_IRQHandler(void)
@@ -427,38 +213,111 @@ float QuatQ3(void)
 }
 
 
-//解锁指令
-uint8_t Key[5] = {0x55, 0xAA, 0x13, 0x8E, 0x5F};
-//Z轴角度归零指令
-uint8_t Yaw_Zero[5] = {0x55, 0xAA, 0x0A, 0x04, 0x00};
-//保存指令
-uint8_t Save[5] = {0x55, 0xAA, 0x00, 0x00, 0x00};
-//获取零偏指令
-uint8_t BIAS_CAL[5] = {0x55, 0xAA, 0x0A, 0x01, 0x00};
+/*============================================================================
+ * 硬件 I2C 陀螺仪 (I2C_Gyro_INST = I2C0, PA8=SDA, PA14=SCL)
+ *===========================================================================*/
+#define GYRO_I2C_ADDR   0x48
 
-/****************************************************************************** 
- * 发送 Z轴角度归零命令
-******************************************************************************/ 
-void sendCaliYawCommand(void) 
-{ 
-   uart0_send_SendByte(Key, 5);
-	 delay_ms(100);
-	 uart0_send_SendByte(Yaw_Zero, 5);
-	 delay_ms(100);
-	 uart0_send_SendByte(Save, 5);
+uint8_t Gyro_Key[3]      = {0x13, 0x8E, 0x5F};
+uint8_t Gyro_Yaw_Zero[3] = {0x0A, 0x04, 0x00};
+uint8_t Gyro_Save[3]     = {0x00, 0x00, 0x00};
+uint8_t Gyro_BIAS_CAL[3] = {0x0A, 0x01, 0x00};
+
+#define GYRO_REG_GYRO   0xAA
+#define GYRO_REG_ANGLE  0xBB
+#define GYRO_REG_ACCEL  0xCC
+#define GYRO_REG_QUAT   0xDD
+
+static void Gyro_I2C_Write(uint8_t *data, uint8_t len)
+{
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
+    DL_I2C_fillControllerTXFIFO(I2C_Gyro_INST, data, len);
+    DL_I2C_startControllerTransfer(I2C_Gyro_INST, GYRO_I2C_ADDR, DL_I2C_CONTROLLER_DIRECTION_TX, len);
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS));
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
 }
 
+static uint8_t Gyro_I2C_ReadReg(uint8_t reg, uint8_t *data, uint8_t len)
+{
+    // 写寄存器地址
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
+    DL_I2C_fillControllerTXFIFO(I2C_Gyro_INST, &reg, 1);
+    DL_I2C_startControllerTransfer(I2C_Gyro_INST, GYRO_I2C_ADDR, DL_I2C_CONTROLLER_DIRECTION_TX, 1);
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS));
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
 
-/****************************************************************************** 
-* 发送校准指令(校准过程中请勿移动，否则会校准失败或者校准效果不好)
-******************************************************************************/ 
-void performCaliBias(void) 
-{ 
-   uart0_send_SendByte(Key, 5);
-	 delay_ms(100);
-	 uart0_send_SendByte(BIAS_CAL, 5);
-	 delay_ms(6000);
-	 uart0_send_SendByte(Save, 5);
+    // 读数据
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
+    DL_I2C_startControllerTransfer(I2C_Gyro_INST, GYRO_I2C_ADDR, DL_I2C_CONTROLLER_DIRECTION_RX, len);
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS));
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
+
+    for (uint8_t i = 0; i < len; i++) {
+        data[i] = DL_I2C_receiveControllerData(I2C_Gyro_INST);
+    }
+    return 1;
+}
+
+void Get_senserdata(void)
+{
+    uint8_t buf[8];
+
+    if (Gyro_I2C_ReadReg(GYRO_REG_GYRO, buf, 8)) {
+        short wx = (short)((buf[1] << 8) | buf[0]);
+        short wy = (short)((buf[3] << 8) | buf[2]);
+        short wz = (short)((buf[5] << 8) | buf[4]);
+        stcGyro.wx = (float)wx / 32768.0f * 2000.0f;
+        stcGyro.wy = (float)wy / 32768.0f * 2000.0f;
+        stcGyro.wz = (float)wz / 32768.0f * 2000.0f;
+    }
+
+    if (Gyro_I2C_ReadReg(GYRO_REG_ANGLE, buf, 8)) {
+        short roll  = (short)((buf[1] << 8) | buf[0]);
+        short pitch = (short)((buf[3] << 8) | buf[2]);
+        short yaw   = (short)((buf[5] << 8) | buf[4]);
+        stcAngle.Roll  = (float)roll  / 32768.0f * 180.0f;
+        stcAngle.Pitch = (float)pitch / 32768.0f * 180.0f;
+        stcAngle.Yaw   = (float)yaw   / 32768.0f * 180.0f;
+    }
+
+    if (Gyro_I2C_ReadReg(GYRO_REG_ACCEL, buf, 8)) {
+        short ax = (short)((buf[1] << 8) | buf[0]);
+        short ay = (short)((buf[3] << 8) | buf[2]);
+        short az = (short)((buf[5] << 8) | buf[4]);
+        const float G = 9.8f;
+        stcAccel.ax = (float)ax / 32768.0f * 16.0f * G;
+        stcAccel.ay = (float)ay / 32768.0f * 16.0f * G;
+        stcAccel.az = (float)az / 32768.0f * 16.0f * G;
+    }
+
+    if (Gyro_I2C_ReadReg(GYRO_REG_QUAT, buf, 8)) {
+        short q0 = (short)((buf[1] << 8) | buf[0]);
+        short q1 = (short)((buf[3] << 8) | buf[2]);
+        short q2 = (short)((buf[5] << 8) | buf[4]);
+        short q3 = (short)((buf[7] << 8) | buf[6]);
+        stcQuat.q0 = (float)q0 / 32768.0f;
+        stcQuat.q1 = (float)q1 / 32768.0f;
+        stcQuat.q2 = (float)q2 / 32768.0f;
+        stcQuat.q3 = (float)q3 / 32768.0f;
+    }
+}
+
+void sendCaliYawCommand(void)
+{
+    Gyro_I2C_Write(Gyro_Key, 3);
+    delay_ms(100);
+    Gyro_I2C_Write(Gyro_Yaw_Zero, 3);
+    delay_ms(100);
+    Gyro_I2C_Write(Gyro_Save, 3);
+}
+
+void performCaliBias(void)
+{
+    Gyro_I2C_Write(Gyro_Key, 3);
+    delay_ms(100);
+    Gyro_I2C_Write(Gyro_BIAS_CAL, 3);
+    delay_ms(6000);
+    Gyro_I2C_Write(Gyro_Save, 3);
 }
 
 

@@ -10,20 +10,26 @@
 
 | 功能 | 硬件 | 引脚 | 代码宏 | 波特率 | DMA |
 |------|------|------|--------|--------|-----|
-| 陀螺仪 | UART1 | PA18(RX)/PA17(TX) | `UART_0_INST` | 912600 | 无 |
 | printf | UART0 | PA11(RX)/PA10(TX) | `UART_1_INST` | 115200 | CH0/CH1 |
 
-- 陀螺仪 ISR: `UART_0_INST_IRQHandler` → `CopeSerial2Data()` 解析 0x5A 帧
 - printf: `board.c` 的 `fputc` → `UART_1_INST`
-- 校准命令 `sendCaliYawCommand` / `performCaliBias` 走 UART_0
-- 陀螺仪数据通过 4 个全局结构体输出: `stcGyro` / `stcAngle` / `stcAccel` / `stcQuat`，无返回值
 
-## 陀螺仪数据帧 (0x5A)
+## 陀螺仪 I2C (硬件 I2C0)
 
-- `CopeSerial2Data()` 逐字节接收，凑满 11 字节帧后校验，写入全局变量
-- 帧类型: `0xAA`=角速度, `0xBB`=角度, `0xCC`=加速度, `0xDD`=四元数
-- `uart0_send_SendByte(data, len)` 向陀螺仪发送指令 (UART_0_INST)
-- 预设指令数组: `Key[5]`, `Yaw_Zero[5]`, `Save[5]`, `BIAS_CAL[5]`
+- 硬件: I2C0, `I2C_Gyro_INST`, PA8=SDA / PA14=SCL, 400kHz Fast Mode
+- 从机地址: `0x48`
+- `Gyro_I2C_Write()` — 写数据 (无寄存器地址)，`Gyro_I2C_ReadReg()` — 读寄存器
+- `Get_senserdata()` — 主动读取 4 个寄存器 (0xAA 角速度 / 0xBB 角度 / 0xCC 加速度 / 0xDD 四元数)
+- 数据格式与 UART 帧一致：每寄存器 8 字节，每值 2 字节 short，/32768 缩放
+- 校准命令 `sendCaliYawCommand()` / `performCaliBias()` → `Gyro_I2C_Write()`
+- 指令数组: `Gyro_Key[3]`, `Gyro_Yaw_Zero[3]`, `Gyro_Save[3]`, `Gyro_BIAS_CAL[3]` (3 字节，无 0x55 0xAA 帧头)
+- 陀螺仪数据通过 4 个全局结构体输出: `stcGyro` / `stcAngle` / `stcAccel` / `stcQuat`
+- **注意**: SDK 的 I2C 控制器接收函数是 `DL_I2C_receiveControllerData()`，不是 `DL_I2C_readControllerRXFIFO()`
+
+## 分支说明
+
+- `main` — UART1 (PA18/PA17) 读取陀螺仪，DMA + CopeSerial2Data 帧解析
+- `i2c-gyro` — 硬件 I2C0 (PA8/PA14) 读取陀螺仪，主动轮询 Get_senserdata()
 
 ## SysConfig
 
@@ -35,8 +41,8 @@
 
 ## 关键文件
 
-- `empty.c` — main，6 区模板循环（陀螺仪读取 / INS更新 / 循迹 / INS运动 / printf / 陀螺仪指令）
-- `board.c/h` — UART 收发、陀螺仪解析、printf 重定向
+- `empty.c` — main，6 区模板循环（I2C陀螺仪读取 / INS更新 / 循迹 / INS运动 / printf / I2C陀螺仪指令）
+- `board.c/h` — UART printf 重定向、硬件 I2C 陀螺仪解析
 - `uart.c/h` — 已废弃，`Set_CurrentUART()` 无效，不要 include
 - `encoder.c` — 编码器测速，自行管理 LMotor(TIMG7) 中断
 - `Motor.c` — 电机控制，PWM 用 TIMG0

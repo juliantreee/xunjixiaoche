@@ -22,12 +22,7 @@
 #endif
 
 void board_init(void);
-void uart0_send_char(char ch);
-void uart0_send_string(char* str);
-void uart0_send_SendByte(uint8_t* data, uint32_t len);
 void uart1_send_char(char ch);
-void uart1_send_string(char* str);
-void uart1_send_SendByte(uint8_t* data, uint32_t len);
 int fputc(int ch, FILE *f);
 /* 延时函数（delay_us/delay_ms 见 delay.h） */
 void delay_1us(int __us);
@@ -108,5 +103,6 @@ float Pitch(void);
 
 void sendCaliYawCommand(void);
 void performCaliBias(void);
+void Get_senserdata(void);
 	
 #endif
