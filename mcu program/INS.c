@@ -22,13 +22,6 @@
 #define ACCEL_THRESHOLD 0.05f   // 加速度死区：低于此值视为静止
 #define VEL_DECAY       0.999f  // 每步速度衰减：抑制零速漂移
 
-/* ---------- 外部引用 ---------- */
-
-// board.c 中有定义但 board.h 中未声明，此处 extern 补齐
-extern float AccelX(void);
-extern float AccelY(void);
-extern float AccelZ(void);
-
 /* ---------- 全局状态 ---------- */
 
 INS_State ins;  // 导航状态：位置、速度、航向
@@ -176,6 +169,8 @@ static float norm_yaw(float yaw)
  */
 void INS_GoStraight(float distance_m, float speed_rpm)
 {
+    if (fabsf(speed_rpm) < 1.0f) return;    // 速度为零直接返回
+
     float start_yaw = Yaw();                // 锁定的目标航向
     float base_rpm  = fabsf(speed_rpm);
     if (distance_m < 0) base_rpm = -base_rpm;  // 反向

@@ -1,9 +1,9 @@
 #include "oled.h"
 #include "stdlib.h"
 #include "oledfont.h"
+#include "delay.h"
 
 u8 OLED_GRAM[144][8];
-extern void delay_ms(uint32_t ms);
 
 //反显函数
 void OLED_ColorTurn(u8 i)
@@ -30,25 +30,29 @@ void OLED_DisplayTurn(u8 i)
 void OLED_WR_Byte(uint8_t dat, uint8_t mode)
 {
     uint8_t txData[2];
-    
-    // 控制字节: 0x00为命令, 0x40为数据
-    txData[0] = mode ? 0x40 : 0x00; 
+    volatile uint32_t to;
+
+    txData[0] = mode ? 0x40 : 0x00;
     txData[1] = dat;
 
-    // 1. 等待 I2C 彻底空闲
-    while (!(DL_I2C_getControllerStatus(I2C_OLED_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
-    
-    // 2. 将 2 个字节填入发送 FIFO
+    to = 100000;
+    while (!(DL_I2C_getControllerStatus(I2C_OLED_INST) & DL_I2C_CONTROLLER_STATUS_IDLE)) {
+        if (--to == 0) return;
+    }
+
     DL_I2C_fillControllerTXFIFO(I2C_OLED_INST, txData, 2);
-    
-    // 3. 启动传输
+
     DL_I2C_startControllerTransfer(I2C_OLED_INST, 0x3C, DL_I2C_CONTROLLER_DIRECTION_TX, 2);
-    
-    // 4. 等待总线变为 BUSY 状态 (确保硬件状态机已经启动，比 delay 更可靠)
-    while (!(DL_I2C_getControllerStatus(I2C_OLED_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS));
-    
-    // 5. 再次等待 I2C 回到空闲状态 (代表本次传输真正完成)
-    while (!(DL_I2C_getControllerStatus(I2C_OLED_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
+
+    to = 100000;
+    while (!(DL_I2C_getControllerStatus(I2C_OLED_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS)) {
+        if (--to == 0) return;
+    }
+
+    to = 100000;
+    while (!(DL_I2C_getControllerStatus(I2C_OLED_INST) & DL_I2C_CONTROLLER_STATUS_IDLE)) {
+        if (--to == 0) return;
+    }
 }
 
 //开启OLED显示 
@@ -64,7 +68,7 @@ void OLED_DisPlay_Off(void)
 {
 	OLED_WR_Byte(0x8D,OLED_CMD);//电荷泵使能
 	OLED_WR_Byte(0x10,OLED_CMD);//关闭电荷泵
-	OLED_WR_Byte(0xAF,OLED_CMD);//关闭屏幕
+	OLED_WR_Byte(0xAE,OLED_CMD);//关闭屏幕
 }
 
 //更新显存到OLED	
@@ -108,13 +112,9 @@ void OLED_DrawPoint(u8 x,u8 y)
 //清除一个点
 void OLED_ClearPoint(u8 x,u8 y)
 {
-	u8 i,m,n;
-	i=y/8;
-	m=y%8;
-	n=1<<m;
-	OLED_GRAM[x][i]=~OLED_GRAM[x][i];
-	OLED_GRAM[x][i]|=n;
-	OLED_GRAM[x][i]=~OLED_GRAM[x][i];
+	u8 i = y / 8;
+	u8 n = 1 << (y % 8);
+	OLED_GRAM[x][i] &= ~n;
 }
 
 //画线
@@ -262,7 +262,7 @@ void OLED_WR_BP(u8 x,u8 y)
 {
 	OLED_WR_Byte(0xb0+y,OLED_CMD);//设置行起始地址
 	OLED_WR_Byte(((x&0xf0)>>4)|0x10,OLED_CMD);
-	OLED_WR_Byte((x&0x0f)|0x01,OLED_CMD);
+	OLED_WR_Byte((x&0x0f)|0x00,OLED_CMD);
 }
 
 //显示图片
@@ -270,8 +270,6 @@ void OLED_ShowPicture(u8 x0,u8 y0,u8 x1,u8 y1,u8 BMP[])
 {
 	u32 j=0;
 	u8 x=0,y=0;
-	if(y%8==0)y=0;
-	else y+=1;
 	for(y=y0;y<y1;y++)
 	{
 		 OLED_WR_BP(x0,y);

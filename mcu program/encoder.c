@@ -2,7 +2,6 @@
 #include "encoder.h"
 #include <ti/driverlib/m0p/dl_interrupt.h>
 #include <ti/driverlib/dl_timerg.h>
-#include "uart.h"
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -73,7 +72,9 @@ double get_speed(void)
     }
     else
     {
-        return 1920000.0/(LFCap -LSCap);
+        int32_t diff = (int32_t)LFCap - (int32_t)LSCap;
+        if (diff <= 0) return 0.1;  // 防除零/负值（堵转或计数溢出）
+        return 1920000.0 / diff;
     }
 }
 

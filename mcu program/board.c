@@ -5,7 +5,6 @@
 #include "delay.h"
 #include "ti/driverlib/m0p/dl_core.h"
 
-volatile unsigned int delay_times = 0;
 volatile unsigned char uart_data = 0;
 
 /*============================================================================
@@ -28,7 +27,12 @@ void board_init(void)
 {
 	SYSCFG_DL_init();
 
-	// 使能 printf 调试串口中断
+	// 关闭 DMA RX 事件，改用 UART 中断接收
+	DL_UART_Main_disableDMAReceiveEvent(UART_1_INST, DL_UART_DMA_INTERRUPT_RX);
+	// 使能 UART RX 中断（外设级）
+	DL_UART_Main_enableInterrupt(UART_1_INST, DL_UART_MAIN_INTERRUPT_RX);
+
+	// 使能 NVIC 中断
 	NVIC_ClearPendingIRQ(UART_1_INST_INT_IRQN);
 	NVIC_EnableIRQ(UART_1_INST_INT_IRQN);
 }
@@ -45,7 +49,7 @@ void uart1_send_char(char ch)
 void uart1_send_string(char* str)
 {
     //当前字符串地址不在结尾 并且 字符串首地址不为空
-    while(*str!=0&&str!=0)
+    while(str != NULL && *str != '\0')
     {
         //发送字符串首地址中的字符，并且在发送完成之后首地址自增
         uart1_send_char(*str++);
@@ -85,17 +89,17 @@ void _sys_exit(int x)
 //串口的中断服务函数
 void UART_1_INST_IRQHandler(void)
 {
-    //如果产生了串口中断
     switch( DL_UART_getPendingInterrupt(UART_1_INST) )
     {
-        case DL_UART_IIDX_RX://如果是接收中断
-            //接发送过来的数据保存在变量中
+        case DL_UART_IIDX_RX:
             uart_data = DL_UART_Main_receiveData(UART_1_INST);
-            //将保存的数据再发送出去
-            uart1_send_char(uart_data);
+            // 非阻塞回发：TX 忙则跳过，不在 ISR 中死等
+            if (DL_UART_isBusy(UART_1_INST) == false) {
+                DL_UART_Main_transmitData(UART_1_INST, uart_data);
+            }
             break;
 
-        default://其他的串口中断
+        default:
             break;
     }
 }
@@ -230,27 +234,58 @@ uint8_t Gyro_BIAS_CAL[3] = {0x0A, 0x01, 0x00};
 
 static void Gyro_I2C_Write(uint8_t *data, uint8_t len)
 {
-    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
+    volatile uint32_t to;
+
+    to = 100000;
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE)) {
+        if (--to == 0) return;
+    }
     DL_I2C_fillControllerTXFIFO(I2C_Gyro_INST, data, len);
     DL_I2C_startControllerTransfer(I2C_Gyro_INST, GYRO_I2C_ADDR, DL_I2C_CONTROLLER_DIRECTION_TX, len);
-    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS));
-    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
+    to = 100000;
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS)) {
+        if (--to == 0) return;
+    }
+    to = 100000;
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE)) {
+        if (--to == 0) return;
+    }
 }
 
 static uint8_t Gyro_I2C_ReadReg(uint8_t reg, uint8_t *data, uint8_t len)
 {
+    volatile uint32_t to;
+
     // 写寄存器地址
-    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
+    to = 100000;
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE)) {
+        if (--to == 0) return 0;
+    }
     DL_I2C_fillControllerTXFIFO(I2C_Gyro_INST, &reg, 1);
     DL_I2C_startControllerTransfer(I2C_Gyro_INST, GYRO_I2C_ADDR, DL_I2C_CONTROLLER_DIRECTION_TX, 1);
-    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS));
-    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
+    to = 100000;
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS)) {
+        if (--to == 0) return 0;
+    }
+    to = 100000;
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE)) {
+        if (--to == 0) return 0;
+    }
 
     // 读数据
-    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
+    to = 100000;
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE)) {
+        if (--to == 0) return 0;
+    }
     DL_I2C_startControllerTransfer(I2C_Gyro_INST, GYRO_I2C_ADDR, DL_I2C_CONTROLLER_DIRECTION_RX, len);
-    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS));
-    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
+    to = 100000;
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS)) {
+        if (--to == 0) return 0;
+    }
+    to = 100000;
+    while (!(DL_I2C_getControllerStatus(I2C_Gyro_INST) & DL_I2C_CONTROLLER_STATUS_IDLE)) {
+        if (--to == 0) return 0;
+    }
 
     for (uint8_t i = 0; i < len; i++) {
         data[i] = DL_I2C_receiveControllerData(I2C_Gyro_INST);
@@ -260,7 +295,7 @@ static uint8_t Gyro_I2C_ReadReg(uint8_t reg, uint8_t *data, uint8_t len)
 
 void Get_senserdata(void)
 {
-    uint8_t buf[8];
+    uint8_t buf[8] = {0};
 
     if (Gyro_I2C_ReadReg(GYRO_REG_GYRO, buf, 8)) {
         short wx = (short)((buf[1] << 8) | buf[0]);

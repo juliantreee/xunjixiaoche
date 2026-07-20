@@ -31,6 +31,7 @@ struct PID{
 PID* pid_create(double kp, double ki, double kd, double Ctlmax, double Ctlmin,double dt)
 {
     PID* p = (PID*)malloc(sizeof(PID));
+    if (p == NULL) return NULL;
     p->Kp = kp;
     p->Ki = ki;
     p->Kd = kd;
@@ -43,15 +44,17 @@ PID* pid_create(double kp, double ki, double kd, double Ctlmax, double Ctlmin,do
     return p;
 }
 
-void pid_clear(PID *in) //重置
+void pid_clear(PID *in)
 {
+    if (in == NULL) return;
     in->lastValue = 0.0;
     in->ierror = 0.0;
     in->first = true;
 }
 
-double pid_step(PID *in,double value,double target)  //传入当前值和目标值,返回控制值
+double pid_step(PID *in,double value,double target)
 {
+    if (in == NULL) return 0.0;
     if(in->first == true)
     {
         in->lastValue = value;
@@ -89,6 +92,7 @@ double pid_step(PID *in,double value,double target)  //传入当前值和目标�
 //设置控制限制
 void pid_set_limit(PID *in,double max,double min)
 {
+    if (in == NULL) return;
     in->CtlMax = max;
     in->CtlMin = min;
 }

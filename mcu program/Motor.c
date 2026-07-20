@@ -28,7 +28,7 @@ void MotorR_brake()
 
 void MotorR_speed(double speed)
 {
-    DL_Timer_setCaptureCompareValue(Motor_INST, (uint32_t)speed*16, GPIO_Motor_C1_IDX);
+    DL_Timer_setCaptureCompareValue(Motor_INST, (uint32_t)(speed * 16), GPIO_Motor_C1_IDX);
 }
 
 
@@ -58,7 +58,7 @@ void MotorL_brake()
 
 void MotorL_speed(double speed)
 {
-    DL_Timer_setCaptureCompareValue(Motor_INST, (uint32_t)speed*16, GPIO_Motor_C0_IDX);
+    DL_Timer_setCaptureCompareValue(Motor_INST, (uint32_t)(speed * 16), GPIO_Motor_C0_IDX);
 }
 
 
@@ -91,24 +91,6 @@ void cospeed(double speed)
     MotorL_speed(speed);
     MotorR_speed(speed);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

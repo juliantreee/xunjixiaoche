@@ -4,6 +4,7 @@
 #include "track.h"
 #include "delay.h"
 #include <stdio.h>
+#include <math.h>
 
 PID *track;
 
@@ -13,6 +14,7 @@ void track_Init(void)
 {
     Motor_pid_Init();
     track = pid_create(5.0,1.0,0.0,100,-100,0.005);
+    if (track == NULL) return;
 }
 
 signed char track_err(void)
@@ -55,17 +57,21 @@ signed char track_err(void)
             return -4;
             break;
         }
-        default: //其他情况
+        default: //线丢失，直行（偏差=0）
         {
-            return 100;
+            return 0;
         }
     }
 }
 
 void to_next_cross(double speed)
 {
+    double abs_speed = fabs(speed);
+    if (abs_speed < 1.0) abs_speed = 1.0;  // 防除零
+
     pid_clear(track);
-    while(1)
+    uint32_t timeout = 10000;  // ~50s max，防止死循环
+    while(timeout--)
     {
         signed char err = track_err();
         if(((gray_value >> 0) & 1) == 1)
@@ -74,7 +80,7 @@ void to_next_cross(double speed)
             {
                 Lmotor_run(speed);
                 Rmotor_run(speed);
-                for(int i = 1; i <= (int)(12000*stop_distance/speed); i++)
+                for(int i = 1; i <= (int)(12000*stop_distance/abs_speed); i++)
                 {
                     Motor_pid_step();
                     delay_ms(5);
@@ -87,7 +93,7 @@ void to_next_cross(double speed)
             {
                 Lmotor_run(speed);
                 Rmotor_run(speed);
-                for(int i = 1; i <= (int)(12000*stop_distance/speed); i++)//继续前进到轮子在线上
+                for(int i = 1; i <= (int)(12000*stop_distance/abs_speed); i++)//继续前进到轮子在线上
                 {
                     Motor_pid_step();
                     delay_ms(5);
@@ -112,7 +118,7 @@ void to_next_cross(double speed)
         {
             Lmotor_run(speed);
             Rmotor_run(speed);
-            for(int i = 1; i <= (int)(12000*stop_distance/speed); i++)//继续前进到轮子在线上
+            for(int i = 1; i <= (int)(12000*stop_distance/abs_speed); i++)//继续前进到轮子在线上
             {
                 Motor_pid_step();
                 delay_ms(5);

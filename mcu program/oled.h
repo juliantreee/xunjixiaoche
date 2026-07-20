@@ -53,47 +53,6 @@ void OLED_ColorTurn(u8 i);
 void OLED_DisplayTurn(u8 i);
 
 /**
- * @brief I2C 起始信号
- *
- * @note 该函数通常用于软件模拟 I2C（GPIO 模拟时序）中，
- *       表示主机发起一次新的 I2C 通信。
- *       在你当前这份代码里 OLED_WR_Byte() 使用的是 MSPM0 硬件 I2C，
- *       所以这个函数可能是旧版接口保留，当前未实际使用。
- */
-void I2C_Start(void);
-
-/**
- * @brief I2C 停止信号
- *
- * @note 该函数通常用于软件模拟 I2C 中，
- *       表示主机结束当前 I2C 通信。
- *       若项目改为硬件 I2C 驱动，则通常不需要手动写这个函数。
- */
-void I2C_Stop(void);
-
-/**
- * @brief 等待从机应答信号
- *
- * @note 常用于软件模拟 I2C，主机发送完一个字节后，
- *       等待从机返回 ACK 应答。
- *       若 OLED 未正确接线、地址错误或设备未上电，
- *       通常会在这里无应答。
- */
-void I2C_WaitAck(void);
-
-/**
- * @brief 通过 I2C 发送一个字节
- *
- * @param dat 要发送的 8 位数据
- *            - 可以是 OLED 命令
- *            - 也可以是 OLED 显示数据
- *
- * @note 该函数一般配合软件模拟 I2C 使用。
- *       在当前硬件 I2C 实现中，其功能通常被 OLED_WR_Byte() 取代。
- */
-void Send_Byte(u8 dat);
-
-/**
  * @brief 向 OLED 写入一个字节的数据或命令
  *
  * @param dat 要写入 OLED 的 8 位内容
@@ -267,23 +226,6 @@ void OLED_ShowNum(u8 x,u8 y,u32 num,u8 len,u8 size1);
  * - num 的实际含义取决于你在字库中存放汉字的顺序
  */
 void OLED_ShowChinese(u8 x,u8 y,u8 num,u8 size1);
-
-/**
- * @brief 让屏幕内容进行滚动显示
- *
- * @param num 滚动的页数、步数或起始页参数
- *            - 具体含义取决于函数实现
- *            - 常见做法中可表示从第几页开始滚动或滚动范围
- *
- * @param space 滚动速度间隔或滚动步进间距
- *              - 具体含义取决于函数实现
- *              - 常用于控制滚动快慢
- *
- * @note 你提供的代码里没有该函数实现，
- *       这里是根据常见 OLED 滚动接口推断的参数语义。
- *       如果你后面贴出实现，我可以按真实逻辑再精确修订一版。
- */
-void OLED_ScrollDisplay(u8 num,u8 space);
 
 /**
  * @brief 设置 OLED 写入数据的起始页和列地址

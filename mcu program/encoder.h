@@ -7,6 +7,7 @@
 extern volatile int LF;
 extern volatile bool LD,Ltimeout;
 extern volatile uint16_t LFCap,LSCap;
+extern volatile uint16_t RFCap,RSCap;
 
 double get_speed(void);
 double get_l_speed(void);

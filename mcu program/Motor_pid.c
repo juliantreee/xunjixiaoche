@@ -6,53 +6,62 @@
 #include "Motor_pid.h"
 #include <stdio.h>
 #include <string.h>
-#include "uart.h"
 
 PID *Lmotor_pid,*Rmotor_pid;
 bool lrun = false;
 bool rrun = false;//电机启动标识
 double LRPM,RRPM;
-double LCtl,RCtl;
 
 void Motor_pid_Init(void)
 {
     stopnow();
     Encoder_Init();
-    Lmotor_pid = pid_create(2.36,1.25,0.0, 95.0, -95.0, 0.005);//Kp,Ki,Kd,最大油门，最小油门，定时器周期
+    Lmotor_pid = pid_create(2.36,1.25,0.0, 95.0, -95.0, 0.005);
     Rmotor_pid = pid_create(2.36,1.25,0.0, 95.0, -95.0, 0.005);
+    if (Lmotor_pid == NULL || Rmotor_pid == NULL) return;
     lrun = false;
     rrun = false;
-    LCtl = 0;
-    RCtl = 0;
 }
 
 //电机启动,设置速度也用这个
-void Lmotor_run(double rpm)//rpm正向前，负向后
+void Lmotor_run(double rpm)
 {
     if (rpm > 0)
     {
         MotorL_forward();
         LRPM = rpm;
+        lrun = true;
     }
-    else {
+    else if (rpm < 0)
+    {
         MotorL_backward();
         LRPM = rpm;
+        lrun = true;
     }
-    lrun = true;
+    else
+    {
+        Lmotor_stop();  // rpm=0 停止
+    }
 }
 
-void Rmotor_run(double rpm)//rpm正向前，负向后
+void Rmotor_run(double rpm)
 {
     if (rpm > 0)
     {
         MotorR_forward();
         RRPM = rpm;
+        rrun = true;
     }
-    else {
+    else if (rpm < 0)
+    {
         MotorR_backward();
         RRPM = rpm;
+        rrun = true;
     }
-    rrun = true;
+    else
+    {
+        Rmotor_stop();  // rpm=0 停止
+    }
 }
 
 

@@ -97,6 +97,15 @@ float GyroX(void);
 float GyroY(void);
 float GyroZ(void);
 
+float AccelX(void);
+float AccelY(void);
+float AccelZ(void);
+
+float QuatQ0(void);
+float QuatQ1(void);
+float QuatQ2(void);
+float QuatQ3(void);
+
 float Yaw(void);
 float Roll(void);
 float Pitch(void);
