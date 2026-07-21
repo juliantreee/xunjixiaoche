@@ -27,8 +27,6 @@ void board_init(void)
 {
 	SYSCFG_DL_init();
 
-	// 关闭 DMA RX 事件，改用 UART 中断接收
-	DL_UART_Main_disableDMAReceiveEvent(UART_1_INST, DL_UART_DMA_INTERRUPT_RX);
 	// 使能 UART RX 中断（外设级）
 	DL_UART_Main_enableInterrupt(UART_1_INST, DL_UART_MAIN_INTERRUPT_RX);
 
