@@ -50,10 +50,14 @@
     int main(void)
     {
         board_init();
+        delay_1us(10);
         Encoder_Init();
+        delay_1us(10);
         track_Init();
+        delay_1us(10);
         INS_Init();
-
+        delay_1us(10);
+        OLED_Init();
         while (1)
         {
             /* ================================================================ */
@@ -101,6 +105,13 @@
             /* 5. 串口发送 (UART_1_INST → printf调试输出)                        */
             /* ================================================================ */
             // printf("Yaw:%.2f Pitch:%.2f Roll:%.2f\r\n", yaw, pitch, roll);
+            printf("gyro_x:%.2f gyro_y:%.2f gyro_z:%.2f\r\n", gyro_x, gyro_y, gyro_z);
+
+            printf("accel_x:%.2f accel_y:%.2f accel_z:%.2f\r\n", accel_x, accel_y, accel_z);
+
+            printf("Yaw:%.2f Pitch:%.2f Roll:%.2f\r\n", yaw, pitch, roll);
+
+            printf("q0:%.2f q1:%.2f  q2:%.2f q3:%.2f\r\n", q0, q1, q2,q3);
 
             /* ================================================================ */
             /* 6. I2C 陀螺仪指令发送                                              */
