@@ -1,5 +1,6 @@
 #include "ti_msp_dl_config.h"
 #include "Motor_pid.h"
+#include "Motor.h"
 #include "Graysensor.h"
 #include "track.h"
 #include "delay.h"
@@ -7,7 +8,7 @@
 
 PID *track;
 
-double stop_distance = 0.53; //识别到路口后继续开的距离，单位为圈数
+double stop_distance = 0.45; //识别到路口后继续开的距离，单位为圈数
 
 void track_Init(void)
 {
@@ -70,6 +71,11 @@ void to_next_cross(double speed)
         signed char err = track_err();
         if(((gray_value >> 0) & 1) == 1)
         {
+        delay_ms(2);
+        if(((gray_value >> 0) & 1) != 1)
+        {
+            continue;
+        }
             if(((gray_value >> 7) & 1) == 1) //十字路口
             {
                 Lmotor_run(speed);
@@ -97,11 +103,13 @@ void to_next_cross(double speed)
                 delay_ms(300);
                 Lmotor_run(-100);
                 Rmotor_run(100);
-                for(int j=0; j <= 61; j++) //转向
+                DL_GPIO_setPins(To_luban_PORT, To_luban_Tx_PIN);
+                for(int j=0; j <= 68; j++) //转向
                 {
                     Motor_pid_step();
                     delay_ms(5);
                 }
+                DL_GPIO_clearPins(To_luban_PORT, To_luban_Tx_PIN);
                 Lmotor_brake();
                 Rmotor_brake();
                 delay_ms(500);
@@ -110,6 +118,11 @@ void to_next_cross(double speed)
         }
         else if(((gray_value >> 7) & 1) == 1) //右路口
         {
+        delay_ms(2);
+        if(((gray_value >> 7) & 1) != 1)
+        {
+            continue;
+        }
             Lmotor_run(speed);
             Rmotor_run(speed);
             for(int i = 1; i <= (int)(12000*stop_distance/speed); i++)//继续前进到轮子在线上
@@ -122,11 +135,13 @@ void to_next_cross(double speed)
             delay_ms(300);
             Lmotor_run(100);
             Rmotor_run(-100);
-            for(int j=0; j <= 61; j++)
+            DL_GPIO_setPins(To_luban_PORT, To_luban_Tx_PIN);
+            for(int j=0; j <= 64; j++)
             {
                 Motor_pid_step();
                 delay_ms(5);
             }
+            DL_GPIO_clearPins(To_luban_PORT, To_luban_Tx_PIN);
             Lmotor_brake();
             Rmotor_brake();
             delay_ms(500);

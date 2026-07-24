@@ -48,13 +48,65 @@
 
     int main(void)
     {
+        DL_GPIO_clearPins(To_luban_PORT, To_luban_Tx_PIN);
         SYSCFG_DL_init();
         Encoder_Init();
         Set_CurrentUART(0);
         track_Init();
-        while (1) 
+        int turns = 0;
+        if(DL_GPIO_readPins(Control_PORT, Control_Sel_PIN) == 0)
         {
-            to_next_cross(200); 
+            delay_ms(500);
+            while (DL_GPIO_readPins(Control_PORT, Control_Sel_PIN) == 0) 
+            {
+                if(DL_GPIO_readPins(Control_PORT, Control_Tick_PIN) == 0)
+                {
+                    turns += 1;
+                    delay_ms(500);
+                }
+            }
+            for(int i = 1; i <= turns ; i++)
+            {
+                to_next_cross(150);
+                to_next_cross(150);
+                to_next_cross(150);
+                to_next_cross(150);
+            }
+        }
+        else
+        {
+        while(1)
+        {
+            if(DL_GPIO_readPins(To_luban_PORT, To_luban_Rx_PIN) == 0)
+            {
+                break;
+            }
+        }
+        to_next_cross(150);
+        while(1)
+        {
+            if(DL_GPIO_readPins(To_luban_PORT, To_luban_Rx_PIN) == 0)
+            {
+                break;
+            }
+        }
+        to_next_cross(150);
+        while(1)
+        {
+            if(DL_GPIO_readPins(To_luban_PORT, To_luban_Rx_PIN) == 0)
+            {
+                break;
+            }
+        }
+        to_next_cross(150);
+        while(1)
+        {
+            if(DL_GPIO_readPins(To_luban_PORT, To_luban_Rx_PIN) == 0)
+            {
+                break;
+            }
+        }
+        to_next_cross(150);
         }
     }
 
