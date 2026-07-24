@@ -41,18 +41,23 @@
 
     #include <stdio.h>
     #include <string.h>
-    #include "uart.h"
     #include "track.h"
+    #include "board.h"
+    #include "INS.h"
 
 
 
     int main(void)
     {
+<<<<<<< HEAD
         DL_GPIO_clearPins(To_luban_PORT, To_luban_Tx_PIN);
         SYSCFG_DL_init();
+=======
+        board_init();
+>>>>>>> c66ff236aa8351f8af5ccbe202c96e58a8be93e3
         Encoder_Init();
-        Set_CurrentUART(0);
         track_Init();
+<<<<<<< HEAD
         int turns = 0;
         if(DL_GPIO_readPins(Control_PORT, Control_Sel_PIN) == 0)
         {
@@ -107,6 +112,62 @@
             }
         }
         to_next_cross(150);
+=======
+        INS_Init();
+
+        while (1)
+        {
+            /* ================================================================ */
+            /* 1. 陀螺仪数据读取                                                 */
+            /* ================================================================ */
+            float gyro_x = stcGyro.wx;   // 角速度 X (°/s)
+            float gyro_y = stcGyro.wy;   // 角速度 Y (°/s)
+            float gyro_z = stcGyro.wz;   // 角速度 Z (°/s)
+
+            float accel_x = stcAccel.ax; // 加速度 X (m/s²)
+            float accel_y = stcAccel.ay; // 加速度 Y (m/s²)
+            float accel_z = stcAccel.az; // 加速度 Z (m/s²)
+
+            float roll  = stcAngle.Roll;  // 横滚角 (°)
+            float pitch = stcAngle.Pitch; // 俯仰角 (°)
+            float yaw   = stcAngle.Yaw;   // 偏航角 (°)
+
+            float q0 = stcQuat.q0; // 四元数 Q0 (实部)
+            float q1 = stcQuat.q1; // 四元数 Q1 (i分量)
+            float q2 = stcQuat.q2; // 四元数 Q2 (j分量)
+            float q3 = stcQuat.q3; // 四元数 Q3 (k分量)
+
+            /* ================================================================ */
+            /* 2. INS 惯性导航更新                                               */
+            /* ================================================================ */
+            // INS_Update(0.01f);   // 周期更新 (dt=10ms)
+
+            /* ================================================================ */
+            /* 3. 灰度循迹                                                      */
+            /* ================================================================ */
+            // to_next_cross(200);  // 循迹到下一个路口
+            // track_err();         // 获取循迹偏差
+
+            /* ================================================================ */
+            /* 4. INS 运动控制                                                   */
+            /* ================================================================ */
+            // INS_GoStraight(1.0f, 200);         // 直行 1m, 200rpm
+            // INS_GoArc(0.5f, 90.0f, 200);       // 左转 0.5m半径 90°
+            // INS_GoArc(0, 90.0f, 200);          // 原地右转 90° (radius=0)
+            // INS_GoArc(-0.5f, 90.0f, 200);      // 右转 0.5m半径 90°
+
+            /* ================================================================ */
+            /* 5. 串口发送 (UART_1_INST → printf调试输出)                        */
+            /* ================================================================ */
+            // printf("Yaw:%.2f Pitch:%.2f Roll:%.2f\r\n", yaw, pitch, roll);
+
+            /* ================================================================ */
+            /* 6. 串口发送 (UART_0_INST → 陀螺仪指令)                            */
+            /* ================================================================ */
+            // uart0_send_SendByte(cmd_data, len); // 向陀螺仪发送指令
+
+            delay_ms(10);
+>>>>>>> c66ff236aa8351f8af5ccbe202c96e58a8be93e3
         }
     }
 

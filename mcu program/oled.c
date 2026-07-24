@@ -330,9 +330,9 @@ void OLED_DrawRectangel(u8 x1,u8 y1 ,u8 x2,u8 y2,u8 x3,u8 y3 ,u8 x4 ,u8 y4 ,u8 f
 	{
 		for(u8 i=0;i<(x2-x1);i++)//X坐标差
 		{
-			for(u8 j=0;j<(y2-y3);j++)//Y坐标差
+			for(u8 j=0;j<(y3-y2);j++)//Y坐标差
 			{
-				OLED_DrawPoint(x1-i,x1-j);
+				OLED_DrawPoint(x1+i,y1+j);
 			}
 		}
 	}
@@ -344,9 +344,9 @@ void OLED_ClearRectangel(u8 x1,u8 y1,u8 x2,u8 y2,u8 x3,u8 y3 ,u8 x4 ,u8 y4 )//�
 	for(u8 i=0;i<(x2-x1);i++)//X坐标差
 	{
 		{
-			for(u8 j=0;j<(y2-y3);j++)//Y坐标差
+			for(u8 j=0;j<(y3-y2);j++)//Y坐标差
 			{
-				OLED_ClearPoint(x1-i,x1-j);
+				OLED_ClearPoint(x1+i,y1+j);
 			}
 		}
 	}

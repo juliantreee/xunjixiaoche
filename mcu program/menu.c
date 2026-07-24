@@ -1,25 +1,37 @@
 #include "menu.h"
 #include "oled.h"
-extern int flag;
+
+/* ========== 菜单项标签（可自行修改） ========== */
+static const char* menu_labels[MENU_ITEMS] = {
+    "option1",
+    "option2",
+    "option3",
+    "option4"
+};
+
+static uint8_t menu_index = 0;
+
+/* ========== 按键检测（消抖 + 单次触发） ========== */
 typedef enum {
-    KEY1_IDLE,     // 空闲状态
-    KEY1_PRESSED,  // 按键按下（已消抖）
-    KEY1_RELEASED,  // 按键释放（已消抖）
-    KEY2_IDLE,     
-    KEY2_PRESSED,  
-    KEY2_RELEASED  
+    KEY1_IDLE,
+    KEY1_PRESSED,
+    KEY1_RELEASED,
+    KEY2_IDLE,
+    KEY2_PRESSED,
+    KEY2_RELEASED
 } KeyState;
 
-KeyState key1_state = KEY1_IDLE;
-KeyState key2_state = KEY2_IDLE;
+static KeyState key1_state = KEY1_IDLE;
+static KeyState key2_state = KEY2_IDLE;
 
-int getnum() {
+static int getnum(void)
+{
     static uint8_t debounce_counter1 = 0;
     static uint8_t debounce_counter2 = 0;
-    const uint8_t DEBOUNCE_THRESH = 5;  // 5次采样（假设1ms扫描周期）
+    const uint8_t DEBOUNCE_THRESH = 5;
 
-    // 检测 KEY1
-    if (DL_GPIO_readPins(KEY1_PORT, KEY1_PIN_23_PIN) > 0) {  // 低电平有效
+    // KEY1
+    if (DL_GPIO_readPins(KEY1_PORT, KEY1_PIN_23_PIN) > 0) {
         if (key1_state == KEY1_IDLE) {
             key1_state = KEY1_PRESSED;
         } else if (key1_state == KEY1_PRESSED) {
@@ -33,7 +45,7 @@ int getnum() {
         debounce_counter1 = 0;
     }
 
-    // 检测 KEY2（逻辑类似）
+    // KEY2
     if (DL_GPIO_readPins(KEY2_PORT, KEY2_PIN_26_PIN) > 0) {
         if (key2_state == KEY2_IDLE) {
             key2_state = KEY2_PRESSED;
@@ -49,5 +61,50 @@ int getnum() {
     }
 
     return 0;
-}//1为key1，2为key2，0为未检测到
+}
 
+/* ========== 菜单显示 ========== */
+void Menu_Show(void)
+{
+    OLED_Clear();
+
+    // 绘制菜单项: size=16, 行高16px, 左缩进16px 给 ">" 留空
+    for (uint8_t i = 0; i < MENU_ITEMS; i++) {
+        uint8_t y = i * 16;
+        OLED_ShowString(16, y, (uint8_t*)menu_labels[i], 16);
+    }
+
+    // 当前选中行 — ">" 指示器
+    uint8_t y = menu_index * 16;
+    OLED_ShowString(0, y, (uint8_t*)">", 16);
+
+    // 整行反色高亮
+    OLED_AreaInvert(0, y, 127, y + 15);
+    OLED_Refresh();
+}
+
+/* ========== 菜单初始化 ========== */
+void Menu_Init(void)
+{
+    menu_index = 0;
+    Menu_Show();
+}
+
+/* ========== 菜单轮询 — 在主循环中调用 ========== */
+uint8_t Menu_Update(void)
+{
+    int key = getnum();
+    if (key == 0) return 0;
+
+    if (key == 1) {  // KEY1: 下翻
+        menu_index = (menu_index + 1) % MENU_ITEMS;
+        Menu_Show();
+        return 0;
+    }
+
+    if (key == 2) {  // KEY2: 确认
+        return menu_index + 1;  // 1-based 便于 if (ret) 判断
+    }
+
+    return 0;
+}
